@@ -9,31 +9,12 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <net/ethernet.h>
+#include "defines.c"
+/* */
+/* */
 
-#define MAX_PACKET_SIZE 65536
-#define MIN_PACKET_SIZE 64
-/* */
-struct ether_hdr {
-	unsigned char	ether_dhost[6];	// Destination address
-	unsigned char	ether_shost[6];	// Source address
-	unsigned short	ether_type;	// Type of the payload
-};
-/* */
-struct ip_hdr {
-	unsigned char 	ip_v:4,		// IP Version
-			ip_hl:4;	// Header length
-	unsigned char	ip_tos;		// Type of service
-	unsigned short	ip_len;		// Datagram Length
-	unsigned short	ip_id;		// Datagram identifier
-	unsigned short	ip_offset;	// Fragment offset
-	unsigned char	ip_ttl;		// Time To Live
-	unsigned char	ip_proto;	// Protocol
-	unsigned short	ip_csum;	// Header checksum
-	unsigned int	ip_src;		// Source IP address
-	unsigned int	ip_dst;		// Destination IP address
-};
-/* */
-/* */
+
+
 // Bind a socket to a interface
 int bind_iface_name(int fd, char *iface_name)
 {
@@ -47,9 +28,28 @@ void print_eth_address(char *s, unsigned char *eth_addr)
 	       eth_addr[0], eth_addr[1], eth_addr[2],
 	       eth_addr[3], eth_addr[4], eth_addr[5]);
 }
+
+void build_ip_header(unsigned char* buffer, int len){
+	struct ip_hdr* ip_header = (struct ip_hdr*) buffer+BYTES_UNTIL_BODY;
+	printf("\nIP src address = 0x%hx\n", ntohs(ip_header->ip_src));//DEBUG
+	printf("\nIP dest address = 0x%hx\n", ntohs(ip_header->ip_dst));//DEBUG
+	// print_eth_address("IP src ADRESS", ntohs(ip_header->ip_src)); //DEBUG
+	// print_eth_address("IP dest ADRESS", ntohs(ip_header->ip_dst)); //DEBUG
+	// printf("\n");
+	// for(int i = 0; i < len; i++)	{
+	// 	printf("%3X", buffer[i]);
+
+	// }
+	printf("\nsizeof: %d\n", sizeof(ip_header->ip_src));
+
+        
+     printf("\n");
+
+}
+
 /* */
 // Break this function to implement the functionalities of your packet analyser
-void doProcess(unsigned char* packet, int len) {
+void do_process(unsigned char* packet, int len) {
 	if(!len || len < MIN_PACKET_SIZE)
 		return;
 
@@ -58,6 +58,10 @@ void doProcess(unsigned char* packet, int len) {
 	print_eth_address("\nDst =", eth->ether_dhost);
 	print_eth_address(" Src =", eth->ether_shost);
 	printf(" Ether Type = 0x%04X Size = %d", ntohs(eth->ether_type), len);
+
+	build_ip_header(packet, len);
+
+
 	
 	if(eth->ether_type == htons(0x0800)) {
 		//IP
@@ -118,7 +122,7 @@ int main(int argc, char** argv) {
 			fprintf(stderr, "ERROR: %s\n", strerror(errno));
 			exit(1);
 		}
-		doProcess(packet_buffer, n);
+		do_process(packet_buffer, n);
 	}
 
 	free(packet_buffer);
