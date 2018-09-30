@@ -30,9 +30,8 @@ void print_eth_address(char *s, unsigned char *eth_addr)
 }
 
 void build_ip_header(unsigned char* buffer, int len){
-	struct ip_hdr* ip_header = (struct ip_hdr*) buffer+BYTES_UNTIL_BODY;
-	printf("\nIP src address = 0x%hx\n", ntohs(ip_header->ip_src));//DEBUG
-	printf("\nIP dest address = 0x%hx\n", ntohs(ip_header->ip_dst));//DEBUG
+	struct ip_hdr* ip_header = (struct ip_hdr*) (buffer+BYTES_UNTIL_BODY);
+	printf("\nIP ip_v: %hx\n", ip_header->ip_v);//DEBUG
 	// print_eth_address("IP src ADRESS", ntohs(ip_header->ip_src)); //DEBUG
 	// print_eth_address("IP dest ADRESS", ntohs(ip_header->ip_dst)); //DEBUG
 	// printf("\n");
@@ -40,9 +39,7 @@ void build_ip_header(unsigned char* buffer, int len){
 	// 	printf("%3X", buffer[i]);
 
 	// }
-	printf("\nsizeof: %d\n", sizeof(ip_header->ip_src));
-
-        
+    
      printf("\n");
 
 }
