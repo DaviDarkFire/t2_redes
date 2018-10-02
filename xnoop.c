@@ -10,10 +10,26 @@
 #include <netinet/in.h>
 #include <net/ethernet.h>
 #include "defines.c"
+#include <signal.h>
 /* */
 /* */
 
+volatile sig_atomic_t flag = 0;
+void flag_setter(){
+	flag = 1;
+}
 
+void basic_mode(){
+	signal(SIGINT, flag_setter); 
+	while(1){
+		if(flag == 1){
+			printf("FIM DA EXECUÇÂO\n"); //TODO: trocar pela chamada da função que mostra as estatísticas
+			break;
+		}
+		printf("Capturing packets... Ctrl+C to exit. \n");
+		sleep(1);
+	}
+}
 
 // Bind a socket to a interface
 int bind_iface_name(int fd, char *iface_name)
