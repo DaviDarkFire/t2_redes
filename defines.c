@@ -1,7 +1,13 @@
+#define __DEFINES__
+
 #define MAX_PACKET_SIZE 65536
 #define MIN_PACKET_SIZE 64
 #define BYTES_UNTIL_BODY 14
+#define DONT_USE_OPTION -1
 
+#define BASIC_MODE 0
+#define VERBOSE_MODE 1
+#define EXTENDED_VERBOSE_MODE 2
 
 /* */
 struct ether_hdr {
@@ -13,7 +19,7 @@ struct ether_hdr {
 struct ip_hdr {
 	unsigned char ip_hl:4, // Header length NOTA: ESSA SEQUENCIA FUNCIONA PARA ESSE PC, EM OUTROS PODE NÂO FUNCIONAR DADO O BYTEORDER
 	ip_v:4; //ip version
-				
+
 	unsigned char	ip_tos;		// Type of service
 	unsigned short	ip_len;		// Datagram Length
 	unsigned short	ip_id;		// Datagram identifier
@@ -24,4 +30,21 @@ struct ip_hdr {
 	unsigned short	ip_csum;	// Header checksum
 	unsigned int	ip_src;		// Source IP address
 	unsigned int	ip_dst;		// Destination IP address
+};
+
+struct options {
+	int mode = BASIC_MODE;
+	int show_n_first_packets = DONT_USE_OPTION;
+	int shouldnt_translate_names = DONT_USE_OPTION;
+};
+
+struct statistics {
+	unsigned int ethernet_frames;
+	unsigned int ethernet_broadcast;
+	unsigned int arp;
+	unsigned int ip;
+	unsigned int icmp;
+	unsigned int udp;
+	unsigned int tcp;
+	unsigned int to_this_host;
 };

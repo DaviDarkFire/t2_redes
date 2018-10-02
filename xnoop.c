@@ -9,7 +9,14 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <net/ethernet.h>
-#include "defines.c"
+
+#ifndef __DEFINES__
+  #include "defines.c"
+#endif
+
+#ifndef __STRUCT_DEALER__
+  #include "struct_dealer.c"
+#endif
 /* */
 /* */
 
@@ -39,7 +46,7 @@ void build_ip_header(unsigned char* buffer, int len){
 	// 	printf("%3X", buffer[i]);
 
 	// }
-    
+
      printf("\n");
 
 }
@@ -59,14 +66,14 @@ void do_process(unsigned char* packet, int len) {
 	build_ip_header(packet, len);
 
 
-	
+
 	if(eth->ether_type == htons(0x0800)) {
 		//IP
 
 		//...
 	} else if(eth->ether_type == htons(0x0806)) {
 		//ARP
-		
+
 		//...
 	}
 	fflush(stdout);
@@ -87,19 +94,25 @@ int main(int argc, char** argv) {
 	struct sockaddr	saddr;
 	unsigned char	*packet_buffer;
 
+// BEGINNING: dealing with user's parameters in command line
 	if (argc < 3)
 		print_usage();
-	
+
 	if (strcmp(argv[1], "-i"))
-		print_usage();	
-	
+		print_usage();
+
+	opt = init_options();
+	set_options(&opt, argc, argv);
+
+	// END: dealing with user's parameters in command line
+
 	saddr_len = sizeof(saddr);
-	sockfd = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));  
+	sockfd = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
 	if(sockfd < 0) {
 		fprintf(stderr, "ERROR: %s\n", strerror(errno));
 		exit(1);
 	}
-	
+
 	if (bind_iface_name(sockfd, argv[2]) < 0) {
 		perror("Server-setsockopt() error for SO_BINDTODEVICE");
 		printf("%s\n", strerror(errno));
@@ -109,10 +122,10 @@ int main(int argc, char** argv) {
 
 	packet_buffer = malloc(MAX_PACKET_SIZE);
 	if (!packet_buffer) {
-		printf("\nCould not allocate a packet buffer\n");		
+		printf("\nCould not allocate a packet buffer\n");
 		exit(1);
 	}
-	
+
 	while(1) {
 		n = recvfrom(sockfd, packet_buffer, MAX_PACKET_SIZE, 0, &saddr, &saddr_len);
 		if(n < 0) {
