@@ -1,8 +1,4 @@
-#define __STRUCT_DEALER__
-
-#ifndef __DEFINES__
-  #include "defines.c"
-#endif
+#include "defines.h"
 
 struct options init_options(){
   struct options opt;
@@ -26,10 +22,11 @@ struct statistics init_statistics(){
 }
 
 void set_options(struct options *opt, int argc, char** argv){
-  for(int i = 0; i < argc; i++){
+  int i;
+  for(i = 0; i < argc; i++){
     if(strcmp(argv[i], "-v") == 0) opt->mode = VERBOSE_MODE;
     if(strcmp(argv[i], "-V") == 0) opt->mode = EXTENDED_VERBOSE_MODE;
     if(strcmp(argv[i], "-c") == 0) opt->show_n_first_packets = atoi(argv[i+1]);
-    if(strcmp(argv[i], "-n") == 0) opt->shoudlnt_translate_names = 1;
+    if(strcmp(argv[i], "-n") == 0) opt->shouldnt_translate_names = 1;
   }
 }

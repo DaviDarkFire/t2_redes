@@ -1,3 +1,4 @@
+#ifndef __DEFINES
 #define __DEFINES__
 
 #define MAX_PACKET_SIZE 65536
@@ -33,9 +34,9 @@ struct ip_hdr {
 };
 
 struct options {
-	int mode = BASIC_MODE;
-	int show_n_first_packets = DONT_USE_OPTION;
-	int shouldnt_translate_names = DONT_USE_OPTION;
+	int mode;
+	int show_n_first_packets;
+	int shouldnt_translate_names;
 };
 
 struct statistics {
@@ -48,3 +49,5 @@ struct statistics {
 	unsigned int tcp;
 	unsigned int to_this_host;
 };
+
+#endif

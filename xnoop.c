@@ -10,13 +10,9 @@
 #include <netinet/in.h>
 #include <net/ethernet.h>
 
-#ifndef __DEFINES__
-  #include "defines.c"
-#endif
+#include "defines.h"
+#include "struct_dealer.h"
 
-#ifndef __STRUCT_DEALER__
-  #include "struct_dealer.c"
-#endif
 /* */
 /* */
 
@@ -101,7 +97,8 @@ int main(int argc, char** argv) {
 	if (strcmp(argv[1], "-i"))
 		print_usage();
 
-	opt = init_options();
+	struct options opt;
+  opt = init_options();
 	set_options(&opt, argc, argv);
 
 	// END: dealing with user's parameters in command line
