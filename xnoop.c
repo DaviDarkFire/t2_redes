@@ -1,5 +1,6 @@
 #include "defines.h"
 #include "struct_dealer.h"
+// #include <signal.h>
 
 volatile sig_atomic_t flag = 0;
 void flag_setter(){
@@ -7,15 +8,22 @@ void flag_setter(){
 }
 
 void basic_mode(){
-	signal(SIGINT, flag_setter); 
-	while(1){
-		if(flag == 1){
-			printf("END OF EXECUTION\n"); //TODO: trocar pela chamada da função que mostra as estatísticas
-			break;
-		}
-		printf("Capturing packets... Ctrl+C to exit. \n");
-		sleep(1);
-	}
+  static struct statistics stat;
+
+  if(flag == 1){
+    printf("ethernet_frames: %u\nethernet_broadcast: %u\narp: %u\nip: %u\nicmp: %u\nudp: %u\ntcp: %u\nto_this_host: %u\n", stat.ethernet_frames, stat.ethernet_broadcast, stat.arp, stat.ip, stat.icmp, stat.udp, stat.tcp, stat.to_this_host);
+    printf("END OF EXECUTION\n"); //TODO: trocar pela chamada da função que mostra as estatísticas
+    // aqui vai a funçao que imprime o struct
+    exit(0);
+  }
+
+
+  stat.ethernet_frames += 1;
+
+  //aqui vem os ifs pra saber que tipo de protocolo vai ser, e contabilizar no struct stat
+
+
+	printf("Capturing packets... Ctrl+C to exit. \n");
 }
 
 // Bind a socket to a interface
@@ -49,7 +57,8 @@ void build_ip_header(unsigned char* buffer, int len){
 
 /* */
 // Break this function to implement the functionalities of your packet analyser
-void do_process(unsigned char* packet, int len) {
+void do_process(unsigned char* packet, int len, struct options opt) {
+  printf("entrei na do_process\n"); //DEBUG
 	if(!len || len < MIN_PACKET_SIZE)
 		return;
 
@@ -62,16 +71,27 @@ void do_process(unsigned char* packet, int len) {
 	build_ip_header(packet, len);
 
 
+  if(opt.mode == BASIC_MODE){
+    printf("Entrou no if basic mode\n"); //DEBUG
 
-	if(eth->ether_type == htons(0x0800)) {
-		//IP
 
-		//...
-	} else if(eth->ether_type == htons(0x0806)) {
-		//ARP
 
-		//...
-	}
+    basic_mode();
+  } else if(opt.mode == VERBOSE_MODE){
+
+  } else if(opt.mode == EXTENDED_VERBOSE_MODE){
+
+  }
+  // vai ficar em outra função que checa tipo
+	// if(eth->ether_type == htons(0x0800)) {
+	// 	//IP
+  //
+	// 	//...
+	// } else if(eth->ether_type == htons(0x0806)) {
+	// 	//ARP
+  //
+	// 	//...
+	// }
 	fflush(stdout);
 }
 /* */
@@ -103,6 +123,21 @@ int main(int argc, char** argv) {
 
 	// END: dealing with user's parameters in command line
 
+  if(opt.mode == BASIC_MODE){
+    struct sigaction act;
+    act.sa_handler = &flag_setter;
+    // act.sa_flags = 0;
+    act.sa_flags = SA_RESTART | SA_NOCLDSTOP;
+    sigemptyset (&act.sa_mask);
+    // sigaction(SIGINT, &act, NULL);
+
+    if (sigaction(SIGINT, &act, NULL) == -1) {
+	  	perror(0);
+	  	exit(1);
+    }
+
+  }
+
 	saddr_len = sizeof(saddr);
 	sockfd = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
 	if(sockfd < 0) {
@@ -122,14 +157,15 @@ int main(int argc, char** argv) {
 		printf("\nCould not allocate a packet buffer\n");
 		exit(1);
 	}
-
+  printf("antes do while(1) da main\n"); //DEBUG
 	while(1) {
 		n = recvfrom(sockfd, packet_buffer, MAX_PACKET_SIZE, 0, &saddr, &saddr_len);
+    printf("passou do recv\n");//DEBUG
 		if(n < 0) {
 			fprintf(stderr, "ERROR: %s\n", strerror(errno));
 			exit(1);
 		}
-		do_process(packet_buffer, n);
+		do_process(packet_buffer, n, opt);
 	}
 
 	free(packet_buffer);

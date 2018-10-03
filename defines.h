@@ -14,8 +14,6 @@
 #include <net/ethernet.h>
 #include <signal.h>
 
-
-
 #define MAX_PACKET_SIZE 65536
 #define MIN_PACKET_SIZE 64
 #define BYTES_UNTIL_BODY 14
