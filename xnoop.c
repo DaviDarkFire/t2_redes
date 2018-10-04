@@ -1,29 +1,56 @@
 #include "defines.h"
 #include "struct_dealer.h"
-// #include <signal.h>
+
+// headers
+void flag_setter();
+void basic_mode(struct ether_hdr* eth, unsigned char* packet);
+int bind_iface_name(int fd, char *iface_name);
+void print_eth_address(char *s, unsigned char *eth_addr);
+struct ip_hdr* build_ip_header(unsigned char* packet);
+void do_process(unsigned char* packet, int len, struct options opt);
+void print_usage();
+// end of headers
+
 
 volatile sig_atomic_t flag = 0;
 void flag_setter(){
 	flag = 1;
 }
 
-void basic_mode(){
+void basic_mode(struct ether_hdr* eth, unsigned char* packet){
   static struct statistics stat;
 
   if(flag == 1){
-    printf("ethernet_frames: %u\nethernet_broadcast: %u\narp: %u\nip: %u\nicmp: %u\nudp: %u\ntcp: %u\nto_this_host: %u\n", stat.ethernet_frames, stat.ethernet_broadcast, stat.arp, stat.ip, stat.icmp, stat.udp, stat.tcp, stat.to_this_host);
+    print_statistics(&stat);
     printf("END OF EXECUTION\n"); //TODO: trocar pela chamada da função que mostra as estatísticas
     // aqui vai a funçao que imprime o struct
     exit(0);
   }
 
-
   stat.ethernet_frames += 1;
 
-  //aqui vem os ifs pra saber que tipo de protocolo vai ser, e contabilizar no struct stat
+	int n_of_ffs = 0;
+	int i;
+
+	// investigar mais se broadcast realmente é assim
+	for(i = 0; i < 6; i++){
+		if(eth->ether_dhost[i] == 0xff) n_of_ffs++;
+	}
+
+	if(n_of_ffs == 6) stat.ethernet_broadcast++;
+	else stat.to_this_host++;
 
 
-	printf("Capturing packets... Ctrl+C to exit. \n");
+	if(eth->ether_type == htons(0x0800)) { //IP
+		stat.ip++;
+		struct ip_hdr* ip_header;
+		ip_header = build_ip_header(packet);
+		if(ip_header->ip_proto == 0x01) stat.icmp++; // IP-ICMP
+		else if(ip_header->ip_proto == 0x11) stat.udp++; // IP-UDP
+		else if(ip_header->ip_proto == 0x06) stat.tcp++; // IP-TCP
+	} else if(eth->ether_type == htons(0x0806)) { // ARP
+		stat.arp++;
+	}
 }
 
 // Bind a socket to a interface
@@ -40,9 +67,9 @@ void print_eth_address(char *s, unsigned char *eth_addr)
 	       eth_addr[3], eth_addr[4], eth_addr[5]);
 }
 
-void build_ip_header(unsigned char* buffer, int len){
-	struct ip_hdr* ip_header = (struct ip_hdr*) (buffer+BYTES_UNTIL_BODY);
-	printf("\nIP ip_v: %hx\n", ip_header->ip_v);//DEBUG
+struct ip_hdr* build_ip_header(unsigned char* packet){
+	struct ip_hdr* ip_header = (struct ip_hdr*) (packet+BYTES_UNTIL_BODY);
+	// printf("\nIP ip_v: %hx\n", ip_header->ip_v);//DEBUG
 	// print_eth_address("IP src ADRESS", ntohs(ip_header->ip_src)); //DEBUG
 	// print_eth_address("IP dest ADRESS", ntohs(ip_header->ip_dst)); //DEBUG
 	// printf("\n");
@@ -51,14 +78,14 @@ void build_ip_header(unsigned char* buffer, int len){
 
 	// }
 
-     printf("\n");
-
+  // printf("\n");
+	return ip_header;
 }
 
 /* */
 // Break this function to implement the functionalities of your packet analyser
 void do_process(unsigned char* packet, int len, struct options opt) {
-  printf("entrei na do_process\n"); //DEBUG
+  // printf("entrei na do_process\n"); //DEBUG
 	if(!len || len < MIN_PACKET_SIZE)
 		return;
 
@@ -68,30 +95,15 @@ void do_process(unsigned char* packet, int len, struct options opt) {
 	print_eth_address(" Src =", eth->ether_shost);
 	printf(" Ether Type = 0x%04X Size = %d", ntohs(eth->ether_type), len);
 
-	build_ip_header(packet, len);
-
-
   if(opt.mode == BASIC_MODE){
-    printf("Entrou no if basic mode\n"); //DEBUG
-
-
-
-    basic_mode();
+    // printf("Entrou no if basic mode\n"); //DEBUG
+		printf("\nCapturing packets... Ctrl+C to exit. \n");
+    basic_mode(eth, packet);
   } else if(opt.mode == VERBOSE_MODE){
 
   } else if(opt.mode == EXTENDED_VERBOSE_MODE){
 
   }
-  // vai ficar em outra função que checa tipo
-	// if(eth->ether_type == htons(0x0800)) {
-	// 	//IP
-  //
-	// 	//...
-	// } else if(eth->ether_type == htons(0x0806)) {
-	// 	//ARP
-  //
-	// 	//...
-	// }
 	fflush(stdout);
 }
 /* */
@@ -157,10 +169,10 @@ int main(int argc, char** argv) {
 		printf("\nCould not allocate a packet buffer\n");
 		exit(1);
 	}
-  printf("antes do while(1) da main\n"); //DEBUG
+  // printf("antes do while(1) da main\n"); //DEBUG
 	while(1) {
 		n = recvfrom(sockfd, packet_buffer, MAX_PACKET_SIZE, 0, &saddr, &saddr_len);
-    printf("passou do recv\n");//DEBUG
+    // printf("passou do recv\n");//DEBUG
 		if(n < 0) {
 			fprintf(stderr, "ERROR: %s\n", strerror(errno));
 			exit(1);

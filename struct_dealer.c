@@ -30,3 +30,8 @@ void set_options(struct options *opt, int argc, char** argv){
     if(strcmp(argv[i], "-n") == 0) opt->shouldnt_translate_names = 1;
   }
 }
+
+void print_statistics(struct statistics *stat){
+  printf("\nethernet_frames: %u\nethernet_broadcast: %u\narp: %u\nip: %u\nicmp: %u\nudp: %u\ntcp: %u\nto_this_host: %u\n",
+   stat->ethernet_frames, stat->ethernet_broadcast, stat->arp, stat->ip, stat->icmp, stat->udp, stat->tcp, stat->to_this_host);
+}
