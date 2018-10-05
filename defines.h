@@ -26,6 +26,10 @@
 #define VERBOSE_MODE 1
 #define EXTENDED_VERBOSE_MODE 2
 
+#define ICMP 0x01
+#define UDP 0x11
+#define TCP 0x06
+
 /* */
 struct ether_hdr {
 	unsigned char	ether_dhost[6];	// Destination address

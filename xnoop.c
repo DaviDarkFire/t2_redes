@@ -10,8 +10,73 @@ void print_eth_address(char *s, unsigned char *eth_addr);
 struct ip_hdr* build_ip_header(unsigned char* packet);
 void do_process(unsigned char* packet, int len, struct options* opt);
 void print_usage();
+void verbose_mode(struct ether_hdr* eth, unsigned char* packet, struct options* opt);
+void extended_verbose_mode(struct ether_hdr* eth, unsigned char* packet, struct options* opt);
+
 // end of headers
 
+
+void verbose_mode(struct ether_hdr* eth, unsigned char* packet, struct options* opt){
+	static int packet_counter = 0;
+
+	if(packet_counter == opt->show_n_first_packets)
+		exit(0);
+
+	packet_counter++;
+	// printf("Total: %d Current: %d\n", opt->show_n_first_packets, packet_counter); //DEBUG
+
+	if(eth->ether_type == htons(0x0800)) { //IP
+		struct ip_hdr* ip_header;
+		ip_header = build_ip_header(packet);
+		if(ip_header->ip_proto == ICMP){ // IP-ICMP
+			printf("This is an ICMP Packet.\n");// DEBUG
+		} 
+		else if(ip_header->ip_proto == UDP){ // IP-UDP
+			printf("This is an UDP Packet.\n");// DEBUG
+		} 
+		else if(ip_header->ip_proto == TCP){ // IP-TCP
+			printf("This is a TCP Packet.\n");// DEBUG
+		} 
+		else {
+			printf("This analyzer doesn't know this packet's protocol.\n");
+		}
+	} else if(eth->ether_type == htons(0x0806)) { // ARP
+		printf("This is an ARP Packet.\n");// DEBUG
+	} else {
+		printf("This analyzer doesn't know this packet's protocol.\n");
+	}
+}
+
+void extended_verbose_mode(struct ether_hdr* eth, unsigned char* packet, struct options* opt){
+	static int packet_counter = 0;
+
+	if(packet_counter == opt->show_n_first_packets)
+		exit(0);
+
+	packet_counter++;
+	// printf("Total: %d Current: %d\n", opt->show_n_first_packets, packet_counter); //DEBUG
+
+	if(eth->ether_type == htons(0x0800)) { //IP
+		struct ip_hdr* ip_header;
+		ip_header = build_ip_header(packet);
+		if(ip_header->ip_proto == ICMP){ // IP-ICMP
+			printf("This is an ICMP Packet.\n");// DEBUG
+		} 
+		else if(ip_header->ip_proto == UDP){ // IP-UDP
+			printf("This is an UDP Packet.\n");// DEBUG
+		} 
+		else if(ip_header->ip_proto == TCP){ // IP-TCP
+			printf("This is a TCP Packet.\n");// DEBUG
+		} 
+		else {
+			printf("This analyzer doesn't know this packet's protocol.\n");
+		}
+	} else if(eth->ether_type == htons(0x0806)) { // ARP
+		printf("This is an ARP Packet.\n");// DEBUG
+	} else {
+		printf("This analyzer doesn't know this packet's protocol.\n");
+	}
+}
 
 volatile sig_atomic_t flag = 0;
 void flag_setter(){
@@ -79,9 +144,9 @@ void basic_mode(struct ether_hdr* eth, unsigned char* packet, struct options* op
 		stat.ip++;
 		struct ip_hdr* ip_header;
 		ip_header = build_ip_header(packet);
-		if(ip_header->ip_proto == 0x01) stat.icmp++; // IP-ICMP
-		else if(ip_header->ip_proto == 0x11) stat.udp++; // IP-UDP
-		else if(ip_header->ip_proto == 0x06) stat.tcp++; // IP-TCP
+		if(ip_header->ip_proto == ICMP) stat.icmp++; // IP-ICMP
+		else if(ip_header->ip_proto == UDP) stat.udp++; // IP-UDP
+		else if(ip_header->ip_proto == TCP) stat.tcp++; // IP-TCP
 	} else if(eth->ether_type == htons(0x0806)) { // ARP
 		stat.arp++;
 	}
@@ -134,9 +199,10 @@ void do_process(unsigned char* packet, int len, struct options* opt) {
 		printf("Capturing packets... Ctrl+C to exit. \n");
     	basic_mode(eth, packet, opt);
   } else if(opt->mode == VERBOSE_MODE){
+  	verbose_mode(eth, packet, opt);
 
   } else if(opt->mode == EXTENDED_VERBOSE_MODE){
-
+  	extended_verbose_mode(eth, packet, opt);
   }
 	fflush(stdout);
 }
