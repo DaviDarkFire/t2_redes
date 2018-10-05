@@ -1,11 +1,9 @@
 #include "defines.h"
 
-struct options init_options(){
-  struct options opt;
-  opt.mode = BASIC_MODE;
-  opt.show_n_first_packets = DONT_USE_OPTION;
-  opt.shouldnt_translate_names = DONT_USE_OPTION;
-  return opt;
+void init_options(struct options* opt){
+  opt->mode = BASIC_MODE;
+  opt->show_n_first_packets = DONT_USE_OPTION;
+  opt->shouldnt_translate_names = DONT_USE_OPTION;
 }
 
 struct statistics init_statistics(){
@@ -24,6 +22,7 @@ struct statistics init_statistics(){
 void set_options(struct options *opt, int argc, char** argv){
   int i;
   for(i = 0; i < argc; i++){
+    if(strcmp(argv[i], "-i") == 0) opt->iface = argv[i+1];
     if(strcmp(argv[i], "-v") == 0) opt->mode = VERBOSE_MODE;
     if(strcmp(argv[i], "-V") == 0) opt->mode = EXTENDED_VERBOSE_MODE;
     if(strcmp(argv[i], "-c") == 0) opt->show_n_first_packets = atoi(argv[i+1]);

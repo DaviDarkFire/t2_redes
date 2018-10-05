@@ -13,6 +13,9 @@
 #include <netinet/in.h>
 #include <net/ethernet.h>
 #include <signal.h>
+#include <sys/ioctl.h>
+#include <net/if.h>
+
 
 #define MAX_PACKET_SIZE 65536
 #define MIN_PACKET_SIZE 64
@@ -47,6 +50,7 @@ struct ip_hdr {
 };
 
 struct options {
+	char* iface;
 	int mode;
 	int show_n_first_packets;
 	int shouldnt_translate_names;

@@ -3,11 +3,12 @@
 
 // headers
 void flag_setter();
-void basic_mode(struct ether_hdr* eth, unsigned char* packet);
+void basic_mode(struct ether_hdr* eth, unsigned char* packet, struct options* opt);
+unsigned char* get_mac_adress(char *iface);
 int bind_iface_name(int fd, char *iface_name);
 void print_eth_address(char *s, unsigned char *eth_addr);
 struct ip_hdr* build_ip_header(unsigned char* packet);
-void do_process(unsigned char* packet, int len, struct options opt);
+void do_process(unsigned char* packet, int len, struct options* opt);
 void print_usage();
 // end of headers
 
@@ -17,7 +18,31 @@ void flag_setter(){
 	flag = 1;
 }
 
-void basic_mode(struct ether_hdr* eth, unsigned char* packet){
+unsigned char* get_mac_adress(char *iface){
+
+
+	int fd;
+    struct ifreq ifr;
+    // char *iface = "eth0";
+    unsigned char *mac;
+     
+    fd = socket(AF_INET, SOCK_DGRAM, 0);
+ 
+    ifr.ifr_addr.sa_family = AF_INET;
+    strncpy(ifr.ifr_name , iface , IFNAMSIZ-1);
+ 
+    ioctl(fd, SIOCGIFHWADDR, &ifr);
+ 
+    close(fd);
+     
+    mac = (unsigned char *)ifr.ifr_hwaddr.sa_data;
+
+     
+    return mac;
+    
+}
+
+void basic_mode(struct ether_hdr* eth, unsigned char* packet, struct options* opt){
   static struct statistics stat;
 
   if(flag == 1){
@@ -37,8 +62,17 @@ void basic_mode(struct ether_hdr* eth, unsigned char* packet){
 		if(eth->ether_dhost[i] == 0xff) n_of_ffs++;
 	}
 
-	if(n_of_ffs == 6) stat.ethernet_broadcast++;
-	else stat.to_this_host++;
+	if(n_of_ffs == 6){ 
+		stat.ethernet_broadcast++;
+	}else{
+		if(memcmp(get_mac_adress(opt->iface), eth->ether_dhost, 6) == 0)
+    		stat.to_this_host++;
+		 }
+
+    // printf("IFACE: %u\n", get_mac_adress(opt->iface)); // DEBUG
+    // print_eth_address("MAC LIDO", get_mac_adress(opt->iface));// DEBUG
+    // print_eth_address("MAC RECEBIDO",eth->ether_dhost);// DEBUG
+
 
 
 	if(eth->ether_type == htons(0x0800)) { //IP
@@ -84,24 +118,24 @@ struct ip_hdr* build_ip_header(unsigned char* packet){
 
 /* */
 // Break this function to implement the functionalities of your packet analyser
-void do_process(unsigned char* packet, int len, struct options opt) {
+void do_process(unsigned char* packet, int len, struct options* opt) {
   // printf("entrei na do_process\n"); //DEBUG
 	if(!len || len < MIN_PACKET_SIZE)
 		return;
 
 	struct ether_hdr* eth = (struct ether_hdr*) packet;
 
-	print_eth_address("\nDst =", eth->ether_dhost);
-	print_eth_address(" Src =", eth->ether_shost);
-	printf(" Ether Type = 0x%04X Size = %d", ntohs(eth->ether_type), len);
+	// print_eth_address("\nDst =", eth->ether_dhost);
+	// print_eth_address(" Src =", eth->ether_shost);
+	// printf(" Ether Type = 0x%04X Size = %d", ntohs(eth->ether_type), len);
 
-  if(opt.mode == BASIC_MODE){
+  if(opt->mode == BASIC_MODE){
     // printf("Entrou no if basic mode\n"); //DEBUG
-		printf("\nCapturing packets... Ctrl+C to exit. \n");
-    basic_mode(eth, packet);
-  } else if(opt.mode == VERBOSE_MODE){
+		printf("Capturing packets... Ctrl+C to exit. \n");
+    	basic_mode(eth, packet, opt);
+  } else if(opt->mode == VERBOSE_MODE){
 
-  } else if(opt.mode == EXTENDED_VERBOSE_MODE){
+  } else if(opt->mode == EXTENDED_VERBOSE_MODE){
 
   }
 	fflush(stdout);
@@ -129,13 +163,14 @@ int main(int argc, char** argv) {
 	if (strcmp(argv[1], "-i"))
 		print_usage();
 
-	struct options opt;
-  opt = init_options();
-	set_options(&opt, argc, argv);
+	struct options* opt;
+	opt = malloc(sizeof(struct options));
+    init_options(opt);
+	set_options(opt, argc, argv);
 
 	// END: dealing with user's parameters in command line
 
-  if(opt.mode == BASIC_MODE){
+  if(opt->mode == BASIC_MODE){
     struct sigaction act;
     act.sa_handler = &flag_setter;
     // act.sa_flags = 0;
