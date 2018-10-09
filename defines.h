@@ -20,6 +20,7 @@
 #define MAX_PACKET_SIZE 65536
 #define MIN_PACKET_SIZE 64
 #define BYTES_UNTIL_BODY 14
+#define BYTES_UNTIL_IP_DATA 20
 #define DONT_USE_OPTION -1
 
 #define BASIC_MODE 0
@@ -63,12 +64,31 @@ struct tcp_hdr {
 	unsigned short dst_port;
 	unsigned int seq_num;
 	unsigned int ack_num;
-	// talvez tenha que fazer esquema do bigendian x lil endian aqui
+	// TODO: talvez tenha que fazer esquema do bigendian x lil endian aqui
 	unsigned short data_offset:4, reserved:3, control_flags: 9;
 	unsigned short window_size;
 	unsigned short checksum;
 	unsigned short urgent_pointer;
 	// options?
+};
+
+struct udp_hdr {
+	unsigned short src_port;
+	unsigned short dst_port;
+	unsigned short len;
+	unsigned short checksum;
+};
+
+struct arp_hdr {
+	unsigned short hardware_type;
+	unsigned short protocol_type;
+	unsigned char hw_addr_len;
+	unsigned char proto_addr_len;
+	unsigned short opcode;
+	unsigned short sender_hw_addr;
+	unsigned int sender_proto_addr;
+	unsigned int target_hw_addr;
+	unsigned int target_proto_addr; 
 };
 
 struct options {

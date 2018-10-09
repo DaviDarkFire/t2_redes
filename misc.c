@@ -14,10 +14,10 @@ char * get_address_as_string_from_uint(unsigned int uint_address){
 	unsigned char first_byte, second_byte, third_byte, fourth_byte;
 	char* char_address = malloc(sizeof(char)*15);
 
-	first_byte = ((uint_address>>24)&0xFF);
-	second_byte = ((uint_address>>16)&0xFF);
-	third_byte = ((uint_address>>8)&0xFF);
-	fourth_byte = (uint_address&0xFF);
+	fourth_byte = ((uint_address>>24)&0xFF);
+	third_byte = ((uint_address>>16)&0xFF);
+	second_byte = ((uint_address>>8)&0xFF);
+	first_byte = (uint_address&0xFF);
 
 	sprintf(char_address, "%d.%d.%d.%d", first_byte, second_byte, third_byte, fourth_byte);
 
@@ -40,7 +40,44 @@ unsigned char* get_mac_adress(char *iface){
     return mac;
 }
 
+struct tcp_hdr* build_tcp_header(unsigned char* packet){
+	struct tcp_hdr* tcp_header = (struct tcp_hdr*) (packet+BYTES_UNTIL_BODY+BYTES_UNTIL_IP_DATA);
+	return tcp_header;
+};
+
 struct ip_hdr* build_ip_header(unsigned char* packet){
 	struct ip_hdr* ip_header = (struct ip_hdr*) (packet+BYTES_UNTIL_BODY);
 	return ip_header;
+}
+
+struct udp_hdr* build_udp_header(unsigned char* packet){
+	struct udp_hdr* udp_header = (struct udp_hdr*) (packet+BYTES_UNTIL_BODY+BYTES_UNTIL_IP_DATA);
+	return udp_header;
+}
+
+struct arp_hdr* build_arp_header(unsigned char* packet){
+	struct arp_hdr* arp_header = (struct arp_hdr*) (packet+BYTES_UNTIL_BODY);
+	return arp_header;
+}
+
+char* translate_address(char* address){
+		struct sockaddr_in sa;
+    socklen_t len;
+    char* hbuf;
+		hbuf = malloc(sizeof(char)*NI_MAXHOST);
+    memset(&sa, 0, sizeof(struct sockaddr_in));
+
+		// printf("passou do memset NA translate_address"); //DEBUG
+
+    sa.sin_family = AF_INET;
+    sa.sin_addr.s_addr = inet_addr(address);
+    len = sizeof(struct sockaddr_in);
+
+    if (getnameinfo((struct sockaddr *) &sa, len, hbuf, sizeof(hbuf),
+        NULL, 0, NI_NAMEREQD)) {
+        return "Address not found";
+    }
+    else {
+        return hbuf;
+    }
 }
