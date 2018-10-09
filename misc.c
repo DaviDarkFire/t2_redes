@@ -44,3 +44,8 @@ struct ip_hdr* build_ip_header(unsigned char* packet){
 	struct ip_hdr* ip_header = (struct ip_hdr*) (packet+BYTES_UNTIL_BODY);
 	return ip_header;
 }
+
+struct icmp_hdr* build_icmp_header(unsigned char* packet){
+    struct icmp_hdr* icmp_header = (struct icmp_hdr*) (packet+BYTES_UNTIL_BODY+BYTES_UNTIL_IP_DATA);
+    return icmp_header;
+}

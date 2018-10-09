@@ -20,6 +20,7 @@
 #define MAX_PACKET_SIZE 65536
 #define MIN_PACKET_SIZE 64
 #define BYTES_UNTIL_BODY 14
+#define BYTES_UNTIL_IP_DATA 20
 #define DONT_USE_OPTION -1
 
 #define BASIC_MODE 0
@@ -68,6 +69,23 @@ struct tcp_hdr {
 	unsigned short window_size;
 	unsigned short checksum;
 	unsigned short urgent_pointer;
+	// options?
+};
+
+struct icmp_hdr {
+	unsigned char type;
+	unsigned char code;
+	unsigned short checksum;
+
+	// unsigned short src_port;
+	// unsigned short dst_port;
+	// unsigned int seq_num;
+	// unsigned int ack_num;
+	// // talvez tenha que fazer esquema do bigendian x lil endian aqui
+	// unsigned short data_offset:4, reserved:3, control_flags: 9;
+	// unsigned short window_size;
+	// unsigned short checksum;
+	// unsigned short urgent_pointer;
 	// options?
 };
 
