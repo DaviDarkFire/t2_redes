@@ -1,110 +1,22 @@
 #include "defines.h"
 #include "struct_dealer.h"
+#include "verbose_mode.h"
+#include "ext_verbose_mode.h"
+#include "misc.h"
 
 // headers
 void flag_setter();
 void basic_mode(struct ether_hdr* eth, unsigned char* packet, struct options* opt);
-unsigned char* get_mac_adress(char *iface);
 int bind_iface_name(int fd, char *iface_name);
 void print_eth_address(char *s, unsigned char *eth_addr);
 struct ip_hdr* build_ip_header(unsigned char* packet);
 void do_process(unsigned char* packet, int len, struct options* opt);
 void print_usage();
-void verbose_mode(struct ether_hdr* eth, unsigned char* packet, struct options* opt);
-void extended_verbose_mode(struct ether_hdr* eth, unsigned char* packet, struct options* opt);
-
 // end of headers
-
-
-void verbose_mode(struct ether_hdr* eth, unsigned char* packet, struct options* opt){
-	static int packet_counter = 0;
-
-	if(packet_counter == opt->show_n_first_packets)
-		exit(0);
-
-	packet_counter++;
-	// printf("Total: %d Current: %d\n", opt->show_n_first_packets, packet_counter); //DEBUG
-
-	if(eth->ether_type == htons(0x0800)) { //IP
-		struct ip_hdr* ip_header;
-		ip_header = build_ip_header(packet);
-		if(ip_header->ip_proto == ICMP){ // IP-ICMP
-			printf("This is an ICMP Packet.\n");// DEBUG
-		} 
-		else if(ip_header->ip_proto == UDP){ // IP-UDP
-			printf("This is an UDP Packet.\n");// DEBUG
-		} 
-		else if(ip_header->ip_proto == TCP){ // IP-TCP
-			printf("This is a TCP Packet.\n");// DEBUG
-		} 
-		else {
-			printf("This analyzer doesn't know this packet's protocol.\n");
-		}
-	} else if(eth->ether_type == htons(0x0806)) { // ARP
-		printf("This is an ARP Packet.\n");// DEBUG
-	} else {
-		printf("This analyzer doesn't know this packet's protocol.\n");
-	}
-}
-
-void extended_verbose_mode(struct ether_hdr* eth, unsigned char* packet, struct options* opt){
-	static int packet_counter = 0;
-
-	if(packet_counter == opt->show_n_first_packets)
-		exit(0);
-
-	packet_counter++;
-	// printf("Total: %d Current: %d\n", opt->show_n_first_packets, packet_counter); //DEBUG
-
-	if(eth->ether_type == htons(0x0800)) { //IP
-		struct ip_hdr* ip_header;
-		ip_header = build_ip_header(packet);
-		if(ip_header->ip_proto == ICMP){ // IP-ICMP
-			printf("This is an ICMP Packet.\n");// DEBUG
-		} 
-		else if(ip_header->ip_proto == UDP){ // IP-UDP
-			printf("This is an UDP Packet.\n");// DEBUG
-		} 
-		else if(ip_header->ip_proto == TCP){ // IP-TCP
-			printf("This is a TCP Packet.\n");// DEBUG
-		} 
-		else {
-			printf("This analyzer doesn't know this packet's protocol.\n");
-		}
-	} else if(eth->ether_type == htons(0x0806)) { // ARP
-		printf("This is an ARP Packet.\n");// DEBUG
-	} else {
-		printf("This analyzer doesn't know this packet's protocol.\n");
-	}
-}
 
 volatile sig_atomic_t flag = 0;
 void flag_setter(){
 	flag = 1;
-}
-
-unsigned char* get_mac_adress(char *iface){
-
-
-	int fd;
-    struct ifreq ifr;
-    // char *iface = "eth0";
-    unsigned char *mac;
-     
-    fd = socket(AF_INET, SOCK_DGRAM, 0);
- 
-    ifr.ifr_addr.sa_family = AF_INET;
-    strncpy(ifr.ifr_name , iface , IFNAMSIZ-1);
- 
-    ioctl(fd, SIOCGIFHWADDR, &ifr);
- 
-    close(fd);
-     
-    mac = (unsigned char *)ifr.ifr_hwaddr.sa_data;
-
-     
-    return mac;
-    
 }
 
 void basic_mode(struct ether_hdr* eth, unsigned char* packet, struct options* opt){
@@ -127,7 +39,7 @@ void basic_mode(struct ether_hdr* eth, unsigned char* packet, struct options* op
 		if(eth->ether_dhost[i] == 0xff) n_of_ffs++;
 	}
 
-	if(n_of_ffs == 6){ 
+	if(n_of_ffs == 6){
 		stat.ethernet_broadcast++;
 	}else{
 		if(memcmp(get_mac_adress(opt->iface), eth->ether_dhost, 6) == 0)
@@ -166,20 +78,7 @@ void print_eth_address(char *s, unsigned char *eth_addr)
 	       eth_addr[3], eth_addr[4], eth_addr[5]);
 }
 
-struct ip_hdr* build_ip_header(unsigned char* packet){
-	struct ip_hdr* ip_header = (struct ip_hdr*) (packet+BYTES_UNTIL_BODY);
-	// printf("\nIP ip_v: %hx\n", ip_header->ip_v);//DEBUG
-	// print_eth_address("IP src ADRESS", ntohs(ip_header->ip_src)); //DEBUG
-	// print_eth_address("IP dest ADRESS", ntohs(ip_header->ip_dst)); //DEBUG
-	// printf("\n");
-	// for(int i = 0; i < len; i++)	{
-	// 	printf("%3X", buffer[i]);
 
-	// }
-
-  // printf("\n");
-	return ip_header;
-}
 
 /* */
 // Break this function to implement the functionalities of your packet analyser

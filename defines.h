@@ -38,8 +38,13 @@ struct ether_hdr {
 };
 /* */
 struct ip_hdr {
-	unsigned char ip_hl:4, // Header length NOTA: ESSA SEQUENCIA FUNCIONA PARA ESSE PC, EM OUTROS PODE NÂO FUNCIONAR DADO O BYTEORDER
-	ip_v:4; //ip version
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+	unsigned char ip_hl:4,
+								ip_v:4;
+#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+	unsigned char ip_v:4,
+								ip_hl:4;
+#endif
 
 	unsigned char	ip_tos;		// Type of service
 	unsigned short	ip_len;		// Datagram Length
@@ -51,6 +56,19 @@ struct ip_hdr {
 	unsigned short	ip_csum;	// Header checksum
 	unsigned int	ip_src;		// Source IP address
 	unsigned int	ip_dst;		// Destination IP address
+};
+
+struct tcp_hdr {
+	unsigned short src_port;
+	unsigned short dst_port;
+	unsigned int seq_num;
+	unsigned int ack_num;
+	// talvez tenha que fazer esquema do bigendian x lil endian aqui
+	unsigned short data_offset:4, reserved:3, control_flags: 9;
+	unsigned short window_size;
+	unsigned short checksum;
+	unsigned short urgent_pointer;
+	// options?
 };
 
 struct options {
