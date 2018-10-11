@@ -14,11 +14,11 @@ void print_ip_packet_verbose(unsigned char* packet, struct ip_hdr* ip_header, in
 	if(shouldnt_translate == DONT_USE_OPTION){ // translate addresses
 		char* translated_src = translate_address(src_address);
 		printf(" %s ", translated_src);
-		free(translated_src);
-
+		// free(translated_src); // DEBUG comentei pra ver se sai o seg fault
+		printf("->");
 		char* translated_dst = translate_address(dst_address);
 		printf(" %s ", translated_dst);
-		free(translated_dst);
+		// free(translated_dst); // DEBUG comentei pra ver se sai o seg fault
 
 			// printf("passou das translate_address\n");// DEBUG
 
@@ -52,7 +52,41 @@ void print_ip_packet_verbose(unsigned char* packet, struct ip_hdr* ip_header, in
 }
 
 void print_arp_packet_verbose(unsigned char* packet, int shouldnt_translate){
+	struct arp_hdr* arp_header = (struct arp_hdr*) (packet+BYTES_UNTIL_BODY);
+	char* src_address = get_address_as_string_from_uint(arp_header->sender_proto_addr);
+	char* dst_address = "255.255.255.255";
 
+	print_current_time();
+
+	if(shouldnt_translate == DONT_USE_OPTION){ // translate addresses
+		char* translated_src = translate_address(src_address);
+		printf(" %s ", translated_src);
+		// free(translated_src); // DEBUG comentei pra ver se sai o seg fault
+		printf("->");
+		char* translated_dst = translate_address(dst_address);
+		printf(" %s ", translated_dst);
+		// free(translated_dst); // DEBUG comentei pra ver se sai o seg fault
+
+			// printf("passou das translate_address\n");// DEBUG
+
+	} else { // don't translate addresses
+
+		printf(" %s ", src_address);
+		printf("->");
+		printf(" %s ", dst_address);
+	}
+	free(src_address);
+	free(dst_address);
+
+	if(arp_header->opcode == ARP_REQUEST){
+		char* target_addr = get_address_as_string_from_uint(arp_header->target_proto_addr);
+		printf("Who is %s", target_addr);
+		free (target_addr);
+		printf("\n");
+	} else if (arp_header->opcode == ARP_RESPONSE){
+		printf("I'm not really sure who this is");
+		printf("\n");
+	}
 }
 
 void verbose_mode(struct ether_hdr* eth, unsigned char* packet, struct options* opt){
@@ -67,24 +101,15 @@ void verbose_mode(struct ether_hdr* eth, unsigned char* packet, struct options* 
 	if(eth->ether_type == htons(0x0800)) { //IP
 		struct ip_hdr* ip_header;
 		ip_header = build_ip_header(packet);
-		if(ip_header->ip_proto == ICMP){ // IP-ICMP
-			// printf("This is an ICMP Packet.\n");// DEBUG
+		if(ip_header->ip_proto == ICMP || ip_header->ip_proto == UDP || ip_header->ip_proto == TCP){
 			print_ip_packet_verbose(packet, ip_header, opt->shouldnt_translate_names);
-		}
-		else if(ip_header->ip_proto == UDP){ // IP-UDP
-			// printf("This is an UDP Packet.\n");// DEBUG
-			print_ip_packet_verbose(packet, ip_header, opt->shouldnt_translate_names);
-		}
-		else if(ip_header->ip_proto == TCP){ // IP-TCP
-			// printf("This is a TCP Packet.\n");// DEBUG
-			print_ip_packet_verbose(packet, ip_header, opt->shouldnt_translate_names);
-		}
-		else {
-			// printf("This analyzer doesn't know this packet's protocol.\n");
+		} else {
+			printf("This analyzer doesn't know this packet's protocol.\n");
 		}
 	} else if(eth->ether_type == htons(0x0806)) { // ARP
 		// printf("This is an ARP Packet.\n");// DEBUG
+		print_arp_packet_verbose(packet, opt->shouldnt_translate_names);
 	} else {
-		// printf("This analyzer doesn't know this packet's protocol.\n");
+		printf("This analyzer doesn't know this packet's protocol.\n");
 	}
 }

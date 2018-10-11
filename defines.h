@@ -16,6 +16,10 @@
 #include <sys/ioctl.h>
 #include <net/if.h>
 
+// used to translate names
+#ifndef NI_MAXHOST
+	#define NI_MAXHOST 1025
+#endif
 
 #define MAX_PACKET_SIZE 65536
 #define MIN_PACKET_SIZE 64
@@ -30,6 +34,10 @@
 #define ICMP 0x01
 #define UDP 0x11
 #define TCP 0x06
+
+//ARP OPCODES
+#define ARP_REQUEST 1
+#define ARP_RESPONSE 2
 
 /* */
 struct ether_hdr {
