@@ -42,6 +42,10 @@ void print_ip_packet_verbose(unsigned char* packet, struct ip_hdr* ip_header, in
 		struct udp_hdr* udp_header = build_udp_header(packet);
 		printf("sourceport=%d ", udp_header->src_port);
 		printf("destport=%d\n", udp_header->dst_port);
+	} else if (ip_header->ip_proto == ICMP){
+		printf("ICMP ");
+		// struct icmp_hdr* icmp_header = build_icmp_header(packet);
+		printf("Destination unreachable (Bad port)\n");
 	}
 
 	// cada protocolo terá seu if com os prints do nome do protocolo e das portas
@@ -64,7 +68,8 @@ void verbose_mode(struct ether_hdr* eth, unsigned char* packet, struct options* 
 		struct ip_hdr* ip_header;
 		ip_header = build_ip_header(packet);
 		if(ip_header->ip_proto == ICMP){ // IP-ICMP
-			printf("This is an ICMP Packet.\n");// DEBUG
+			// printf("This is an ICMP Packet.\n");// DEBUG
+			print_ip_packet_verbose(packet, ip_header, opt->shouldnt_translate_names);
 		}
 		else if(ip_header->ip_proto == UDP){ // IP-UDP
 			// printf("This is an UDP Packet.\n");// DEBUG
@@ -75,11 +80,11 @@ void verbose_mode(struct ether_hdr* eth, unsigned char* packet, struct options* 
 			print_ip_packet_verbose(packet, ip_header, opt->shouldnt_translate_names);
 		}
 		else {
-			printf("This analyzer doesn't know this packet's protocol.\n");
+			// printf("This analyzer doesn't know this packet's protocol.\n");
 		}
 	} else if(eth->ether_type == htons(0x0806)) { // ARP
-		printf("This is an ARP Packet.\n");// DEBUG
+		// printf("This is an ARP Packet.\n");// DEBUG
 	} else {
-		printf("This analyzer doesn't know this packet's protocol.\n");
+		// printf("This analyzer doesn't know this packet's protocol.\n");
 	}
 }
