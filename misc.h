@@ -6,5 +6,6 @@
   unsigned char* get_mac_adress(char *iface);
   struct ip_hdr* build_ip_header(unsigned char* packet);
   struct icmp_hdr* build_icmp_header(unsigned char* packet);
+  int get_packet_size(unsigned char* packet);
 
 #endif

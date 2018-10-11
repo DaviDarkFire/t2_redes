@@ -49,3 +49,7 @@ struct icmp_hdr* build_icmp_header(unsigned char* packet){
     struct icmp_hdr* icmp_header = (struct icmp_hdr*) (packet+BYTES_UNTIL_BODY+BYTES_UNTIL_IP_DATA);
     return icmp_header;
 }
+
+int get_packet_size(unsigned char* packet){
+    return sizeof(packet);
+}
