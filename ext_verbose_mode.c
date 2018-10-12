@@ -25,7 +25,7 @@ void extended_verbose_mode(struct ether_hdr* eth, unsigned char* packet, struct 
 			print_ip_protocol(ip_header);
 			struct udp_hdr* udp_header;
 			udp_header = build_udp_header(packet);
-			print_udp_protocol(udp_header);
+			print_udp_protocol(udp_header, packet);
 		}
 		else if(ip_header->ip_proto == TCP){ // IP-TCP
 			printf("This is a TCP Packet.\n");// DEBUG
@@ -101,25 +101,72 @@ void print_ip_protocol(struct ip_hdr* ip){
 }
 
 void print_ip_tos(unsigned char tos){
-	// unsigned char bits bits_zero_to_two, bit_three, bit_four, bit_five;
-	// bits_zero_to_two = ((tos>>5)&0xFF);
-	// bit_three = ((tos>>4)&0xFF);
-	// bit_four =  ((tos>>3)&0xFF);
-	// bit_five = ((tos>>2)&0xFF);
+	unsigned int xor_result;
 
-	printf("IP:       .... .... = lorem ipsum\n"); // TOS descrito
-	printf("IP:       .... .... = lorem ipsum\n"); // TOS descrito
-	printf("IP:       .... .... = lorem ipsum\n"); // TOS descrito
-	printf("IP:       .... .... = lorem ipsum\n"); // TOS descrito
-	// if(bits_zero_to_two == )
+	xor_result = (tos&11100000) ^ 0b11100000;
+	if(xor_result == 0){
+		printf("IP       111. .... = network control\n");
+	} else {
+		xor_result = (tos&11100000) ^ 0b11000000;
+		if(xor_result == 0){
+			printf("IP       110. .... = internetwork control\n");
+		} else {
+			xor_result = (tos&11100000) ^ 0b10100000;
+			if(xor_result == 0){
+				printf("IP       101. .... = critic/ecp\n");
+			} else {
+				xor_result = (tos&11100000) ^ 0b10000000;
+				if(xor_result == 0){
+					printf("IP       100. .... = flash override\n");
+				} else {
+					xor_result = (tos&11100000) ^ 0b01100000;
+					if(xor_result == 0){
+						printf("IP       .11. .... = flash\n");
+					} else {
+						xor_result = (tos&11100000) ^ 0b01000000;
+						if(xor_result == 0){
+							printf("IP       .10. .... = immediate\n");
+						} else {
+							xor_result = (tos&11100000) ^ 0b00100000;
+							if(xor_result == 0){
+								printf("IP       ..1. .... = priority\n");
+							} else {
+								printf("IP       ..0. .... = routine\n");
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	xor_result = (tos&00010000) ^ 0b00010000;
+	if(xor_result == 0) printf("IP       ...1 .... = low delay\n");
+	else printf("IP       ...0 .... = normal delay\n");
+
+	xor_result = (tos&00001000) ^ 0b00001000;
+	if(xor_result == 0) printf("IP       .... 1... = high throughput\n");
+	else printf("IP       .... 0... = normal throughput\n");
+
+	xor_result = (tos&00000100) ^ 0b00000100;
+	if(xor_result == 0) printf("IP       .... .1.. = high reliability\n");
+	else printf("IP       .... .0.. = normal reliability\n");;
 }
 
 void print_ip_flags(unsigned short flags){
-	printf("IP: .... .... = lorem ipsum\n"); // flags descritas
-	printf("IP: .... .... = lorem ipsum\n"); // flags descritas
+	unsigned char xor_result;
+
+	xor_result = (flags&0b010) ^ 0b010;
+	if(xor_result == 0) printf("IP: .1.. .... = don't fragment\n");
+	else printf("IP: .0.. .... = may fragment\n");
+
+	xor_result = (flags&0b001) ^ 0b001;
+	if(xor_result == 0) printf("IP: ..1. .... = more fragments\n");
+	else printf("IP: ..0. .... = last fragment\n");
 }
 
-void print_udp_protocol(struct udp_hdr* udp){
+void print_udp_protocol(struct udp_hdr* udp, unsigned char* packet){
+	unsigned char* data_start = (packet+BYTES_UNTIL_BODY+BYTES_UNTIL_IP_DATA+BYTES_UNTIL_UDP_DATA);
 	printf("UDP:  ----- UDP Header -----\n");
 	printf("UDP: \n");
 	printf("UDP: Source port = %d\n", udp->src_port);
@@ -128,9 +175,21 @@ void print_udp_protocol(struct udp_hdr* udp){
 	printf("UDP: Checksum = %d\n", udp->checksum);
 	printf("UDP: \n");
 	printf("UDP: Data: First 64 bytes\n");
-	// printf("UDP: %4x %4x %4x %4x %4x %4x %4x %4x\n", );
-	// printf("UDP: %4x %4x %4x %4x %4x %4x %4x %4x\n");
-	// printf("UDP: %4x %4x %4x %4x %4x %4x %4x %4x\n");
-	// printf("UDP: %4x %4x %4x %4x %4x %4x %4x %4x\n");
+	print_64_data_bytes("UDP", data_start);
 	printf("UDP: \n");
+}
+
+void print_64_data_bytes(unsigned char* protocol, unsigned char* data_start){
+	printf("%s: %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x\n", protocol,
+	data_start[0], data_start[1], data_start[2], data_start[3], data_start[4], data_start[5], data_start[6], data_start[7],
+	data_start[8], data_start[9], data_start[10], data_start[11], data_start[12], data_start[13], data_start[14], data_start[15]);
+	printf("%s: %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x\n", protocol,
+	data_start[16], data_start[17], data_start[18], data_start[19], data_start[20], data_start[21], data_start[22], data_start[23],
+	data_start[24], data_start[25], data_start[26], data_start[27], data_start[28], data_start[29], data_start[30], data_start[31]);
+	printf("%s: %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x\n", protocol,
+	data_start[32], data_start[33], data_start[34], data_start[35], data_start[36], data_start[37], data_start[38], data_start[39],
+	data_start[40], data_start[41], data_start[42], data_start[43], data_start[44], data_start[45], data_start[46], data_start[47]);
+	printf("%s: %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x\n", protocol,
+	data_start[48], data_start[49], data_start[50], data_start[51], data_start[52], data_start[53], data_start[54], data_start[55],
+	data_start[56], data_start[57], data_start[58], data_start[59], data_start[60], data_start[61], data_start[62], data_start[63]);
 }
