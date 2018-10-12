@@ -182,22 +182,21 @@ void print_udp_protocol(struct udp_hdr* udp, unsigned char* packet){
 }
 
 void print_64_data_bytes(unsigned char* protocol, unsigned char* data_start){
-	printf("%s: %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x\n", protocol,
-	data_start[0], data_start[1], data_start[2], data_start[3], data_start[4], data_start[5], data_start[6], data_start[7],
-	data_start[8], data_start[9], data_start[10], data_start[11], data_start[12], data_start[13], data_start[14], data_start[15]);
-	printf("%s: %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x\n", protocol,
-	data_start[16], data_start[17], data_start[18], data_start[19], data_start[20], data_start[21], data_start[22], data_start[23],
-	data_start[24], data_start[25], data_start[26], data_start[27], data_start[28], data_start[29], data_start[30], data_start[31]);
-	printf("%s: %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x\n", protocol,
-	data_start[32], data_start[33], data_start[34], data_start[35], data_start[36], data_start[37], data_start[38], data_start[39],
-	data_start[40], data_start[41], data_start[42], data_start[43], data_start[44], data_start[45], data_start[46], data_start[47]);
-	printf("%s: %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x\n", protocol,
-	data_start[48], data_start[49], data_start[50], data_start[51], data_start[52], data_start[53], data_start[54], data_start[55],
-	data_start[56], data_start[57], data_start[58], data_start[59], data_start[60], data_start[61], data_start[62], data_start[63]);
+	int i;
+	for(i = 0; i < 64; i=i+2){
+		if(i%16 == 0){
+			if(i!=0) printf("\n");
+			printf("%s: ", protocol);
+		}
+		printf("%02x%02x ", data_start[i], data_start[i+1]);
+	}
+	printf("\n");
 }
 
 
 void print_tcp_protocol(struct tcp_hdr* tcp_header, unsigned char* packet){
+	unsigned char* data_start = (unsigned char*) (packet+BYTES_UNTIL_BODY+BYTES_UNTIL_IP_DATA+tcp_header->data_offset*4); //O data offset diz em words de 32 bits qual o tamanho da header tcp
+
 	printf("TCP: ----- TCP Header -----\n");
 	printf("TCP: Source port = %d\n", tcp_header->src_port);
 	printf("TCP: Destination port = %d\n", tcp_header->dst_port);
@@ -211,11 +210,8 @@ void print_tcp_protocol(struct tcp_hdr* tcp_header, unsigned char* packet){
 	printf("TCP: Urgent pointer = %d\n", tcp_header->urgent_pointer);
 	printf("TCP: No Options\n"); //DEPOIS TEM QUE VER O QUE VAI SER FEITO COM ESSE CAMPO
 	printf("TCP: Data: (first 64 bytes)\n");
-
-	unsigned char* data = (unsigned char*) (packet+BYTES_UNTIL_BODY+BYTES_UNTIL_IP_DATA+tcp_header->data_offset*4); //O data offset diz em words de 32 bits qual o tamanho da header tcp
-
-
-
+	print_64_data_bytes("TCP", data_start);
+	printf("TCP: \n");
 }
 
 void print_tcp_flags(struct tcp_hdr* tcp_header){
