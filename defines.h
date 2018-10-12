@@ -75,18 +75,11 @@ struct tcp_hdr {
 	unsigned int seq_num;
 	unsigned int ack_num;
 	// TODO: talvez tenha que fazer esquema do bigendian x lil endian aqui
-#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-
 	unsigned short data_offset:4, reserved:3, control_flags: 9;
-
-#elif __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-	
-	unsigned short control_flags: 9, reserved:3, data_offset:4;
-#endif
-
 	unsigned short window_size;
 	unsigned short checksum;
 	unsigned short urgent_pointer;
+	// options?
 };
 
 struct udp_hdr {
@@ -112,17 +105,6 @@ struct icmp_hdr {
 	unsigned char type;
 	unsigned char code;
 	unsigned short checksum;
-
-	// unsigned short src_port;
-	// unsigned short dst_port;
-	// unsigned int seq_num;
-	// unsigned int ack_num;
-	// // talvez tenha que fazer esquema do bigendian x lil endian aqui
-	// unsigned short data_offset:4, reserved:3, control_flags: 9;
-	// unsigned short window_size;
-	// unsigned short checksum;
-	// unsigned short urgent_pointer;
-	// options?
 };
 
 struct options {
