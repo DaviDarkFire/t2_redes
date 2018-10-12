@@ -24,7 +24,10 @@ void extended_verbose_mode(struct ether_hdr* eth, unsigned char* packet, struct 
 		}
 		else if(ip_header->ip_proto == TCP){ // IP-TCP
 			printf("This is a TCP Packet.\n");// DEBUG
+			struct tcp_hdr* tcp_header =  build_tcp_header(packet);
+
 			print_ether_protocol(eth, packet_counter, get_packet_size(packet));
+			print_tcp_protocol(tcp_header);
 		}
 		else {
 			printf("This analyzer doesn't know this packet's protocol.\n");
@@ -60,6 +63,17 @@ void print_ether_protocol(struct ether_hdr* eth, int packet_counter, int packet_
 
 void print_ip_protocol(struct ip_hdr* ip){
 	printf("IP: ----- IP Header -----\n");
+
+
+}
+
+void print_tcp_protocol(struct tcp_hdr* tcp_header){
+	printf("TCP: ----- TCP Header -----\n");
+	printf("TCP: Source port = %d\n", tcp_header->src_port);
+	printf("TCP: Destination port = %d\n", tcp_header->dst_port);
+	printf("TCP: Sequence Number = %d\n", tcp_header->seq_num);
+	printf("TCP: Acknowledgement number = %d\n", tcp_header->ack_num);
+	printf("TCP: Data offset = %d bytes\n", tcp_header->data_offset);
 
 
 }
