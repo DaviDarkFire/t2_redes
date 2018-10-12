@@ -72,11 +72,11 @@ struct tcp_hdr {
 #elif __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 	
 	unsigned short control_flags: 9, reserved:3, data_offset:4;
+#endif
 
 	unsigned short window_size;
 	unsigned short checksum;
 	unsigned short urgent_pointer;
-	unsigned char options[40];
 };
 
 struct udp_hdr {
