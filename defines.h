@@ -25,6 +25,7 @@
 #define MIN_PACKET_SIZE 64
 #define BYTES_UNTIL_BODY 14
 #define BYTES_UNTIL_IP_DATA 20
+#define BYTES_UNTIL_UDP_DATA 8
 #define DONT_USE_OPTION -1
 
 #define BASIC_MODE 0
@@ -55,16 +56,17 @@ struct ip_hdr {
 								ip_hl:4;
 #endif
 
-	unsigned char	ip_tos;		// Type of service
-	unsigned short	ip_len;		// Datagram Length
-	unsigned short	ip_id;		// Datagram identifier
-	//pulou 3 bits de flag
-	unsigned short	ip_offset;	// Fragment offset
-	unsigned char	ip_ttl;		// Time To Live
-	unsigned char	ip_proto;	// Protocol
-	unsigned short	ip_csum;	// Header checksum
-	unsigned int	ip_src;		// Source IP address
-	unsigned int	ip_dst;		// Destination IP address
+	unsigned char	ip_tos;					// Type of service
+	unsigned short	ip_len;				// Datagram Length
+	unsigned short	ip_id;				// Datagram identifier
+	// TODO: talvez tenha que fazer esquema do bigendian x lil endian aqui
+	unsigned short	ip_flags:3,		// Flags
+									ip_offset:13;	// Fragment offset
+	unsigned char	ip_ttl;					// Time To Live
+	unsigned char	ip_proto;				// Protocol
+	unsigned short	ip_csum;			// Header checksum
+	unsigned int	ip_src;					// Source IP address
+	unsigned int	ip_dst;					// Destination IP address
 };
 
 struct tcp_hdr {
@@ -103,6 +105,17 @@ struct icmp_hdr {
 	unsigned char type;
 	unsigned char code;
 	unsigned short checksum;
+
+	// unsigned short src_port;
+	// unsigned short dst_port;
+	// unsigned int seq_num;
+	// unsigned int ack_num;
+	// // talvez tenha que fazer esquema do bigendian x lil endian aqui
+	// unsigned short data_offset:4, reserved:3, control_flags: 9;
+	// unsigned short window_size;
+	// unsigned short checksum;
+	// unsigned short urgent_pointer;
+	// options?
 };
 
 struct options {
