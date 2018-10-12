@@ -8,4 +8,6 @@
   void print_ip_flags(unsigned short flags);
   void print_udp_protocol(struct udp_hdr* udp, unsigned char* packet);
   void print_64_data_bytes(unsigned char* protocol, unsigned char* data_start);
+  void print_tcp_protocol(struct tcp_hdr* tcp_header,unsigned char* packet);
+  void print_tcp_flags(struct tcp_hdr* tcp_header);
 #endif

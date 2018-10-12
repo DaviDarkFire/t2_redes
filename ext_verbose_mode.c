@@ -29,8 +29,11 @@ void extended_verbose_mode(struct ether_hdr* eth, unsigned char* packet, struct 
 		}
 		else if(ip_header->ip_proto == TCP){ // IP-TCP
 			printf("This is a TCP Packet.\n");// DEBUG
+			struct tcp_hdr* tcp_header =  build_tcp_header(packet);
+
 			print_ether_protocol(eth, packet_counter, get_packet_size(packet));
 			print_ip_protocol(ip_header);
+			print_tcp_protocol(tcp_header, packet);
 		}
 		else { // IP-UNKNOWN protocol
 			printf("This analyzer doesn't know this packet's protocol.\n");
@@ -139,7 +142,6 @@ void print_ip_tos(unsigned char tos){
 			}
 		}
 	}
-
 	xor_result = (tos&00010000) ^ 0b00010000;
 	if(xor_result == 0) printf("IP       ...1 .... = low delay\n");
 	else printf("IP       ...0 .... = normal delay\n");
@@ -192,4 +194,35 @@ void print_64_data_bytes(unsigned char* protocol, unsigned char* data_start){
 	printf("%s: %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x\n", protocol,
 	data_start[48], data_start[49], data_start[50], data_start[51], data_start[52], data_start[53], data_start[54], data_start[55],
 	data_start[56], data_start[57], data_start[58], data_start[59], data_start[60], data_start[61], data_start[62], data_start[63]);
+}
+
+
+void print_tcp_protocol(struct tcp_hdr* tcp_header, unsigned char* packet){
+	printf("TCP: ----- TCP Header -----\n");
+	printf("TCP: Source port = %d\n", tcp_header->src_port);
+	printf("TCP: Destination port = %d\n", tcp_header->dst_port);
+	printf("TCP: Sequence Number = %d\n", tcp_header->seq_num);
+	printf("TCP: Acknowledgement number = %d\n", tcp_header->ack_num);
+	printf("TCP: Data offset = %d bytes\n", tcp_header->data_offset);
+	printf("TCP: Flags = %hx\n", tcp_header->control_flags);
+	print_tcp_flags(tcp_header);
+	printf("TCP: Window = %d\n", tcp_header->window_size);
+	printf("TCP: Checksum = %d\n", tcp_header->checksum);
+	printf("TCP: Urgent pointer = %d\n", tcp_header->urgent_pointer);
+	printf("TCP: No Options\n"); //DEPOIS TEM QUE VER O QUE VAI SER FEITO COM ESSE CAMPO
+	printf("TCP: Data: (first 64 bytes)\n");
+
+	unsigned char* data = (unsigned char*) (packet+BYTES_UNTIL_BODY+BYTES_UNTIL_IP_DATA+tcp_header->data_offset*4); //O data offset diz em words de 32 bits qual o tamanho da header tcp
+
+
+
+}
+
+void print_tcp_flags(struct tcp_hdr* tcp_header){
+	printf("           ..%d. .... = No Urgent Pointer\n", (tcp_header->control_flags & 1<<5)? 1 : 0);
+	printf("           ...%d .... = Acknowledgement  \n", (tcp_header->control_flags & 1<<4)? 1 : 0);
+	printf("           .... %d... = No Push          \n", (tcp_header->control_flags & 1<<3)? 1 : 0);
+	printf("           .... .%d.. = No Reset         \n", (tcp_header->control_flags & 1<<2)? 1 : 0);
+	printf("           .... ..%d. = No Syn           \n", (tcp_header->control_flags & 1<<1)? 1 : 0);
+	printf("           .... ...%d = No Fin           \n", (tcp_header->control_flags & 1   )? 1 : 0);
 }
