@@ -33,15 +33,26 @@ void print_ip_packet_verbose(unsigned char* packet, struct ip_hdr* ip_header, in
 
 	// TODO: printar aplicação aqui
 	if(ip_header->ip_proto == TCP){
-		printf("TCP ");
 		struct tcp_hdr* tcp_header = build_tcp_header(packet);
-		printf("sourceport=%d ", tcp_header->src_port);
-		printf("destport=%d\n", tcp_header->dst_port);
+		struct servent *sptr;
+
+		sptr = getservbyport(tcp_header->src_port, "tcp");
+
+		printf("TCP ");
+		if(sptr!=NULL) printf("%s ", sptr->s_name);
+		printf("sourceport=%d ", ntohs(tcp_header->src_port)); // TODO: é ntohs mesmo ou puro?
+		printf("destport=%d\n", ntohs(tcp_header->dst_port));
+
 	} else if (ip_header->ip_proto == UDP){
-		printf("UDP ");
 		struct udp_hdr* udp_header = build_udp_header(packet);
-		printf("sourceport=%d ", udp_header->src_port);
-		printf("destport=%d\n", udp_header->dst_port);
+		struct servent *sptr;
+
+		sptr = getservbyport(htons(udp_header->src_port), "udp");
+
+		printf("UDP ");
+		if(sptr!=NULL) printf("%s ", sptr->s_name);
+		printf("sourceport=%d ", ntohs(udp_header->src_port));
+		printf("destport=%d\n", ntohs(udp_header->dst_port));
 	} else if (ip_header->ip_proto == ICMP){
 		printf("ICMP ");
 		// struct icmp_hdr* icmp_header = build_icmp_header(packet);
