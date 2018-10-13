@@ -15,6 +15,7 @@
 #include <signal.h>
 #include <sys/ioctl.h>
 #include <net/if.h>
+#include <ctype.h>
 
 // used to translate names
 #ifndef NI_MAXHOST

@@ -67,14 +67,21 @@ void print_ether_protocol(struct ether_hdr* eth, int packet_counter, int packet_
 	printf("ETHER:\n");
 	printf("ETHER: Packet %d\n", packet_counter);
 	printf("ETHER: Packet size = %u bytes\n", packet_size);
-	printf("ETHER: Destination = %02X:%02X:%02X:%02X:%02X:%02X,\n", eth->ether_dhost[0], eth->ether_dhost[1], eth->ether_dhost[2],eth->ether_dhost[3], eth->ether_dhost[4], eth->ether_dhost[5]);
-	printf("ETHER: Source      = %02X:%02X:%02X:%02X:%02X:%02X,\n", eth->ether_shost[0], eth->ether_shost[1], eth->ether_shost[2],eth->ether_shost[3], eth->ether_shost[4], eth->ether_shost[5]);
+	printf("ETHER: Destination = %02X:%02X:%02X:%02X:%02X:%02X,\n",
+	 eth->ether_dhost[0], eth->ether_dhost[1], eth->ether_dhost[2],eth->ether_dhost[3], eth->ether_dhost[4], eth->ether_dhost[5]);
+	printf("ETHER: Source      = %02X:%02X:%02X:%02X:%02X:%02X,\n",
+	 eth->ether_shost[0], eth->ether_shost[1], eth->ether_shost[2],eth->ether_shost[3], eth->ether_shost[4], eth->ether_shost[5]);
 	printf("ETHER: Ethertype   = %u (%s)\n",  eth->ether_type, protocol);
 	printf("ETHER: \n");
 }
 
 void print_ip_protocol(struct ip_hdr* ip){
 	char protocol[4];
+
+	char* src_addr = get_address_as_string_from_uint(ip->ip_src);
+	char* dst_addr = get_address_as_string_from_uint(ip->ip_dst);
+	char* t_src_addr = translate_address(src_addr);
+	char* t_dst_addr = translate_address(dst_addr);
 
 	if(ip->ip_proto == TCP)
 		strcpy(protocol,"TCP");
@@ -98,10 +105,16 @@ void print_ip_protocol(struct ip_hdr* ip){
 	printf("IP:   Time to live = %u seconds/hops\n", ip->ip_ttl);
 	printf("IP:   Protocol = %u (%s)\n", ip->ip_proto, protocol);
 	printf("IP:   Header checksum = %4x\n", ip->ip_csum);
-	printf("IP:   Source address = %s, %s\n", get_address_as_string_from_uint(ip->ip_src), " "); // TODO: o segundo %s vai o endereço traduzido
-	printf("IP:   Destination address = %s, %s\n", get_address_as_string_from_uint(ip->ip_dst), " "); // TODO: o segundo %s vai o endereço traduzido
+	printf("IP:   Source address = %s", src_addr);
+	if (t_src_addr[3] == '.' && isdigit(t_src_addr[0])) printf("\n");
+	else printf(", %s\n", t_src_addr);
+	printf("IP:   Destination address = %s", dst_addr);
+	if (t_dst_addr[3] == '.' && isdigit(t_dst_addr[0])) printf("\n");
+	else printf(", %s\n", t_dst_addr);
 	printf("IP:   \n");
 
+	free(src_addr);
+	free(dst_addr);
 }
 
 void print_ip_tos(unsigned char tos){
@@ -310,6 +323,11 @@ char* get_icmp_type_string(unsigned char type){
 }
 
 void print_arp_protocol(struct arp_hdr* arp){
+	char* sdr_hw_addr = get_address_as_string_from_uint(arp->sender_hw_addr);
+	char* sdr_pt_addr = get_address_as_string_from_uint(arp->sender_proto_addr);
+	char* tgt_hw_addr = get_address_as_string_from_uint(arp->target_hw_addr);
+	char* tgt_pt_addr = get_address_as_string_from_uint(arp->target_proto_addr);
+
 	printf("ARP:  ----- ARP/RARP Frame -----\n");
 	printf("ARP:  \n");
 	printf("ARP:  Hardware type = %u\n", arp->hardware_type);
@@ -317,9 +335,14 @@ void print_arp_protocol(struct arp_hdr* arp){
 	printf("ARP:  Length of hardware address = %u bytes\n", arp->hw_addr_len);
 	printf("ARP:  Length of protocol address = %u bytes\n", arp->proto_addr_len);
 	printf("ARP:  Opcode %u\n", arp->opcode);
-	printf("ARP:  Sender's hardware address = %s\n", get_address_as_string_from_uint(arp->sender_hw_addr));
-	printf("ARP:  Sender's protocol address = %s\n", get_address_as_string_from_uint(arp->sender_proto_addr));
-	printf("ARP:  Target hardware address = %s\n", get_address_as_string_from_uint(arp->target_hw_addr));
-	printf("ARP:  Target protocol address = %s\n", get_address_as_string_from_uint(arp->target_proto_addr));
+	printf("ARP:  Sender's hardware address = %s\n", sdr_hw_addr);
+	printf("ARP:  Sender's protocol address = %s\n", sdr_pt_addr);
+	printf("ARP:  Target hardware address = %s\n", tgt_hw_addr);
+	printf("ARP:  Target protocol address = %s\n", tgt_pt_addr);
 	printf("ARP:  \n\n");
+
+	free(sdr_hw_addr);
+	free(sdr_pt_addr);
+	free(tgt_hw_addr);
+	free(tgt_pt_addr);
 }
