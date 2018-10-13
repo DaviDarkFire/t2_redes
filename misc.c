@@ -61,24 +61,17 @@ struct arp_hdr* build_arp_header(unsigned char* packet){
 }
 
 char* translate_address(char* address){
+	static char hostname[65] = "";
+
 	struct sockaddr_in sa;
-	socklen_t len;
-	char* hbuf;
-	hbuf = malloc(sizeof(char)*NI_MAXHOST);
-	memset(&sa, 0, sizeof(struct sockaddr_in));
-	// printf("passou do memset NA translate_address"); //DEBUG
-
+	memset(&sa, 0, sizeof(sa));
 	sa.sin_family = AF_INET;
-	sa.sin_addr.s_addr = inet_addr(address);
-	len = sizeof(struct sockaddr_in);
+	sa.sin_addr.s_addr	= inet_addr(address);
+	sa.sin_port = 0;
 
-	if (getnameinfo((struct sockaddr *) &sa, len, hbuf, sizeof(hbuf),
-	    NULL, 0, NI_NAMEREQD)) {
-	    return "Address not found";
-	}
-	else {
-	    return hbuf;
-	}
+	getnameinfo((struct sockaddr *)&sa, sizeof(sa), hostname, 64, NULL, 0, 0);
+
+	return hostname;
 }
 
 struct icmp_hdr* build_icmp_header(unsigned char* packet){
