@@ -43,3 +43,18 @@ int peek(struct stack_node* root){
         return INT_MIN;
     return root->data;
 }
+
+void compute_stack(unsigned char* packet, struct stack_node** root, char** filters, unsigned int len){
+  unsigned int i;
+  struct ether_hdr* eth = (struct ether_hdr*) packet;
+  if(eth->ether_type == htons(0x0800)){ //IP
+    struct ip_hdr* ip = (struct ip_hdr*) (packet+BYTES_UNTIL_BODY);
+    // ...
+  }
+
+  for(i = 0; i < len; i++){
+    if(strcmp(filters[i], "tcp")){
+      
+    }
+  }
+}

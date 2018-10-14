@@ -1,12 +1,19 @@
 #include "defines.h"
 #include "misc.h"
 #include "ext_verbose_mode.h"
+#include "stack.h"
 
 void extended_verbose_mode(struct ether_hdr* eth, unsigned char* packet, struct options* opt){
 	static int packet_counter = 0;
 
 	if(packet_counter == opt->show_n_first_packets)
 		exit(0);
+
+	// TODO: FILTROS: if estiver usando filtros, ver como arranjar o vetor de filtros
+	//struct stack_node* root = NULL;
+	//compute_stack(packet, &root /*,vetordefiltros, tamanhodovetordefiltros*/);
+	//if (peek(root) == 0) return;
+	// acabou uso de filtros
 
 	packet_counter++;
 	// printf("Total: %d Current: %d\n", opt->show_n_first_packets, packet_counter); //DEBUG

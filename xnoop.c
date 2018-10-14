@@ -34,7 +34,6 @@ void basic_mode(struct ether_hdr* eth, unsigned char* packet, struct options* op
 	int n_of_ffs = 0;
 	int i;
 
-	// investigar mais se broadcast realmente é assim
 	for(i = 0; i < 6; i++){
 		if(eth->ether_dhost[i] == 0xff) n_of_ffs++;
 	}
