@@ -239,7 +239,7 @@ void print_tcp_protocol(struct tcp_hdr* tcp_header, unsigned char* packet){
 	printf("TCP:  Sequence Number = %u\n", tcp_header->seq_num);
 	printf("TCP:  Acknowledgement number = %u\n", tcp_header->ack_num);
 	printf("TCP:  Data offset = %u bytes\n", tcp_header->data_offset);
-	printf("TCP:  Flags = %hx\n", tcp_header->control_flags);
+	printf("TCP:  Flags = 0x%hx\n", tcp_header->control_flags);
 	print_tcp_flags(tcp_header);
 	printf("TCP:  Window = %u\n", tcp_header->window_size);
 	printf("TCP:  Checksum = %4x\n", tcp_header->checksum);
@@ -252,12 +252,24 @@ void print_tcp_protocol(struct tcp_hdr* tcp_header, unsigned char* packet){
 
 //TODO: esse print de flags ta certo mesmo?
 void print_tcp_flags(struct tcp_hdr* tcp_header){
-	printf("           ..%u. .... = No Urgent Pointer\n", (tcp_header->control_flags & 1<<5)? 1 : 0);
-	printf("           ...%u .... = Acknowledgement  \n", (tcp_header->control_flags & 1<<4)? 1 : 0);
-	printf("           .... %u... = No Push          \n", (tcp_header->control_flags & 1<<3)? 1 : 0);
-	printf("           .... .%u.. = No Reset         \n", (tcp_header->control_flags & 1<<2)? 1 : 0);
-	printf("           .... ..%u. = No Syn           \n", (tcp_header->control_flags & 1<<1)? 1 : 0);
-	printf("           .... ...%u = No Fin           \n", (tcp_header->control_flags & 1   )? 1 : 0);
+	if(tcp_header->control_flags & 1<<5) printf("           ..1. .... = Urgent Pointer\n");
+	else printf("           ..0. .... = No Urgent Pointer\n");
+	// printf("           ..%u. .... = No Urgent Pointer\n", (tcp_header->control_flags & 1<<5)? 1 : 0);
+	if(tcp_header->control_flags & 1<<4) printf("           ...1 .... = Acknowledgement  \n");
+	else printf("           ...0 .... = No Acknowledgement  \n");
+	// printf("           ...%u .... = Acknowledgement  \n", (tcp_header->control_flags & 1<<4)? 1 : 0);
+	if(tcp_header->control_flags & 1<<3) printf("           .... 1... = Push          \n");
+	else printf("           .... 0... = No Push          \n");
+	// printf("           .... %u... = No Push          \n", (tcp_header->control_flags & 1<<3)? 1 : 0);
+	if(tcp_header->control_flags & 1<<2) printf("           .... .1.. = Reset         \n");
+	else printf("           .... .0.. = No Reset         \n");
+	// printf("           .... .%u.. = No Reset         \n", (tcp_header->control_flags & 1<<2)? 1 : 0);
+	if(tcp_header->control_flags & 1<<1) printf("           .... ..1. = Syn           \n");
+	else printf("           .... ..0. = No Syn           \n");
+	// printf("           .... ..%u. = No Syn           \n", (tcp_header->control_flags & 1<<1)? 1 : 0);
+	// printf("           .... ...%u = Fin           \n", (tcp_header->control_flags & 1   )? 1 : 0);
+	if(tcp_header->control_flags & 1) printf("           .... ...1 = Fin           \n");
+	else printf("           .... ...0 = No Fin           \n");
 }
 
 void print_icmp_protocol(struct icmp_hdr* icmp){
