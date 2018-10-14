@@ -35,7 +35,7 @@ void print_ip_packet_verbose(unsigned char* packet, struct ip_hdr* ip_header, in
 		struct tcp_hdr* tcp_header = build_tcp_header(packet);
 		struct servent *sptr;
 
-		// TODO: tem que checar dst_port pra serviço?
+		// TODO: tem que checar dst_port pra serviço?, e outra, decidir se usa htons ou não, note que udp e tcp tao diferentes
 		sptr = getservbyport(tcp_header->src_port, "tcp");
 
 		printf("TCP ");
