@@ -100,3 +100,23 @@ void printBits(size_t const size, void const * const ptr)
     }
     puts("");
 }
+
+unsigned long int get_ulint_ip_addr_from_string(char* address){
+	char number[3];
+	unsigned long int ulint_addr;
+	int i_number;
+	int shift_bits = 3*8; // at first, shift 3 bytes
+	int i;
+	for (i = 0; i < strlen(address); i++){
+		if (address[i] != '.'){
+			// strcat(number, address[i]);
+			number[i%3] = address[i];
+		}else{ // found a .
+			i_number = atoi(number);
+			ulint_addr = i_number << shift_bits;
+			shift_bits = shift_bits - 8;
+			memset(number, 0, sizeof(number));
+		}
+	}
+	return ulint_addr;
+}

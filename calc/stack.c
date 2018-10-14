@@ -35,6 +35,7 @@ unsigned long int pop(struct stack_node** root){
     unsigned long int popped = temp->data;
     free(temp);
 
+    printf("%lu popped from stack\n", popped); //DEBUG
     return popped;
 }
 
