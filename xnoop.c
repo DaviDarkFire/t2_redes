@@ -10,7 +10,7 @@ void basic_mode(struct ether_hdr* eth, unsigned char* packet, struct options* op
 int bind_iface_name(int fd, char *iface_name);
 void print_eth_address(char *s, unsigned char *eth_addr);
 struct ip_hdr* build_ip_header(unsigned char* packet);
-void do_process(unsigned char* packet, int len, struct options* opt);
+void do_process(unsigned char* packet, int len, struct options* opt, char** filters, unsigned int filters_len);
 void print_usage();
 // end of headers
 
@@ -81,7 +81,7 @@ void print_eth_address(char *s, unsigned char *eth_addr)
 
 /* */
 // Break this function to implement the functionalities of your packet analyser
-void do_process(unsigned char* packet, int len, struct options* opt) {
+void do_process(unsigned char* packet, int len, struct options* opt, char** filters, unsigned int filters_len) {
   // printf("entrei na do_process\n"); //DEBUG
 	if(!len || len < MIN_PACKET_SIZE)
 		return;
@@ -100,7 +100,7 @@ void do_process(unsigned char* packet, int len, struct options* opt) {
   	verbose_mode(eth, packet, opt);
 
   } else if(opt->mode == EXTENDED_VERBOSE_MODE){
-  	extended_verbose_mode(eth, packet, opt);
+  	extended_verbose_mode(eth, packet, opt, filters, filters_len);
   }
 	fflush(stdout);
 }
@@ -130,7 +130,15 @@ int main(int argc, char** argv) {
 	struct options* opt;
 	opt = malloc(sizeof(struct options));
     init_options(opt);
-	set_options(opt, argc, argv);
+	int start_filters_pos = 0;
+	start_filters_pos = set_options(opt, argc, argv)+1;
+	printf("start_filters_pos: %d\n", start_filters_pos); //DEBUG
+	printf("ARGC %d\n", argc); //DEBUG
+
+
+	unsigned int filters_len = argc-start_filters_pos;
+	printf("Filters len %d\n", filters_len); //DEBUG
+	char** filters = argv+start_filters_pos;
 
 	// END: dealing with user's parameters in command line
 
@@ -176,7 +184,7 @@ int main(int argc, char** argv) {
 			fprintf(stderr, "ERROR: %s\n", strerror(errno));
 			exit(1);
 		}
-		do_process(packet_buffer, n, opt);
+		do_process(packet_buffer, n, opt, filters, filters_len);
 	}
 
 	free(packet_buffer);

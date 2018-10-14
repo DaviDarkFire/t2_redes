@@ -19,18 +19,37 @@ struct statistics init_statistics(){
   return stat;
 }
 
-void set_options(struct options *opt, int argc, char** argv){
+unsigned int set_options(struct options *opt, int argc, char** argv){
   int i;
+  unsigned int count_opt = 0;
   for(i = 0; i < argc; i++){
-    if(strcmp(argv[i], "-i") == 0) opt->iface = argv[i+1];
-    if(strcmp(argv[i], "-v") == 0) opt->mode = VERBOSE_MODE;
-    if(strcmp(argv[i], "-V") == 0) opt->mode = EXTENDED_VERBOSE_MODE;
-    if(strcmp(argv[i], "-c") == 0) opt->show_n_first_packets = atoi(argv[i+1]);
-    if(strcmp(argv[i], "-n") == 0) opt->shouldnt_translate_names = 1;
+    if(strcmp(argv[i], "-i") == 0){
+        opt->iface = argv[i+1];
+        count_opt++;
+        count_opt++;
+    }
+    if(strcmp(argv[i], "-v") == 0){
+        opt->mode = VERBOSE_MODE;
+        count_opt++;
+    }
+    if(strcmp(argv[i], "-V") == 0){
+        opt->mode = EXTENDED_VERBOSE_MODE;
+        count_opt++;
+    }
+    if(strcmp(argv[i], "-c") == 0){
+        opt->show_n_first_packets = atoi(argv[i+1]);
+        count_opt++;
+        count_opt++;
+    }
+    if(strcmp(argv[i], "-n") == 0){
+        opt->shouldnt_translate_names = 1;
+        count_opt++;
+    }
   }
+  return count_opt;
 }
 
 void print_statistics(struct statistics *stat){
-  printf("\nethernet_frames: %u\nethernet_broadcast: %u\narp: %u\nip: %u\nicmp: %u\nudp: %u\ntcp: %u\nto_this_host: %u\n",
+  printf("\nethernet_frames: %u\nethernet_broadcast: %u\nARP: %u\nIP: %u\nICMP: %u\nUDP: %u\nTCP: %u\nTo this host: %u\n",
    stat->ethernet_frames, stat->ethernet_broadcast, stat->arp, stat->ip, stat->icmp, stat->udp, stat->tcp, stat->to_this_host);
 }

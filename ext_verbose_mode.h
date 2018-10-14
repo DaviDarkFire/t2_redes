@@ -1,7 +1,7 @@
 #ifndef __EXT_VERBOSE_MODE__
   #define __EXT_VERBOSE_MODE__
 
-  void extended_verbose_mode(struct ether_hdr* eth, unsigned char* packet, struct options* opt);
+  void extended_verbose_mode(struct ether_hdr* eth, unsigned char* packet, struct options* opt, char** filters, unsigned int filters_len);
   void print_ether_protocol(struct ether_hdr* eth, int packet_counter, int packet_size);
   void print_ip_protocol(struct ip_hdr* ip);
   void print_ip_tos(unsigned char tos);
