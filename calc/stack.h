@@ -1,5 +1,10 @@
 #ifndef __STACK__
  #define __STACK__
+ struct stack_node{
+     unsigned long int data;
+     struct stack_node* next;
+ };
+
  struct stack_node* new_node(unsigned long int data);
  int isEmpty(struct stack_node *root);
  void push(struct stack_node** root, unsigned long int data);

@@ -1,4 +1,4 @@
-#include "../defines.h"
+#include "defines.h"
 #include "stack.h"
 #include <ctype.h>
 
@@ -149,6 +149,6 @@ int main(int argc, char** argv){
   struct stack_node* root = NULL;
   // get_ulint_ip_addr_from_string(&root, filters, argc-1);
   compute_stack(&root, filters, argc-1);
-  if(root == NULL) printf("zica\n");
+  if(root == NULL) printf("Erro\n");
   printf("resultado: %lu\n", root->data);
 }

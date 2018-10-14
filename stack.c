@@ -1,12 +1,7 @@
 // código baseado em https://www.geeksforgeeks.org/stack-data-structure-introduction-program/
 
 #include "defines.h"
-#include <limits.h>
-
-struct stack_node{
-    unsigned long int data;
-    struct stack_node* next;
-};
+#include "stack.h"
 
 struct stack_node* new_node(unsigned long int data){
     struct stack_node* node =
@@ -35,6 +30,7 @@ unsigned long int pop(struct stack_node** root){
     unsigned long int popped = temp->data;
     free(temp);
 
+    printf("%lu popped from stack\n", popped); //DEBUG
     return popped;
 }
 
