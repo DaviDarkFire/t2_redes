@@ -31,11 +31,11 @@ void print_ip_packet_verbose(unsigned char* packet, struct ip_hdr* ip_header, in
 	free(src_address);
 	free(dst_address);
 
-	// TODO: printar aplicação aqui
 	if(ip_header->ip_proto == TCP){
 		struct tcp_hdr* tcp_header = build_tcp_header(packet);
 		struct servent *sptr;
 
+		// TODO: tem que checar dst_port pra serviço?
 		sptr = getservbyport(tcp_header->src_port, "tcp");
 
 		printf("TCP ");

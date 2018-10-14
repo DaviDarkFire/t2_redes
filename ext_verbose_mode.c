@@ -16,7 +16,6 @@ void extended_verbose_mode(struct ether_hdr* eth, unsigned char* packet, struct 
 	// acabou uso de filtros
 
 	packet_counter++;
-	// printf("Total: %d Current: %d\n", opt->show_n_first_packets, packet_counter); //DEBUG
 
 	print_ether_protocol(eth, packet_counter, get_packet_size(packet));
 
@@ -113,10 +112,10 @@ void print_ip_protocol(struct ip_hdr* ip){
 	printf("IP:   Protocol = %u (%s)\n", ip->ip_proto, protocol);
 	printf("IP:   Header checksum = %4x\n", ip->ip_csum);
 	printf("IP:   Source address = %s", src_addr);
-	if (t_src_addr[3] == '.' && isdigit(t_src_addr[0])) printf("\n");
+	if (t_src_addr[3] == '.' && isdigit(t_src_addr[0])) printf("\n"); // don't print the address unless it's actually translated
 	else printf(", %s\n", t_src_addr);
 	printf("IP:   Destination address = %s", dst_addr);
-	if (t_dst_addr[3] == '.' && isdigit(t_dst_addr[0])) printf("\n");
+	if (t_dst_addr[3] == '.' && isdigit(t_dst_addr[0])) printf("\n"); // don't print the address unless it's actually translated
 	else printf(", %s\n", t_dst_addr);
 	printf("IP:   \n");
 
@@ -163,16 +162,17 @@ void print_ip_tos(unsigned char tos){
 			}
 		}
 	}
+
 	xor_result = (tos&00010000) ^ 0b00010000;
-	if(xor_result == 0) printf("IP       ...1 .... = low delay\n");
+	if(xor_result == 0) printf("IP:       ...1 .... = low delay\n");
 	else printf("IP:       ...0 .... = normal delay\n");
 
 	xor_result = (tos&00001000) ^ 0b00001000;
-	if(xor_result == 0) printf("IP       .... 1... = high throughput\n");
+	if(xor_result == 0) printf("IP:       .... 1... = high throughput\n");
 	else printf("IP:       .... 0... = normal throughput\n");
 
 	xor_result = (tos&00000100) ^ 0b00000100;
-	if(xor_result == 0) printf("IP       .... .1.. = high reliability\n");
+	if(xor_result == 0) printf("IP:       .... .1.. = high reliability\n");
 	else printf("IP:       .... .0.. = normal reliability\n");;
 }
 
@@ -214,17 +214,13 @@ void print_64_data_bytes(unsigned char* protocol, unsigned char* data_start){
 		printf("%02x%02x ", data_start[i], data_start[i+1]);
 		if(data_start[i] >= 32 && data_start[i] <= 126)
 			ascii_buffer[i%16] = data_start[i];
-			// sprintf(ascii_buffer, "%c", data_start[i]);
 		else
 			ascii_buffer[i%16] = '.';
-			// sprintf(ascii_buffer, ".");
 
 		if(data_start[i+1] >= 32 && data_start[i+1] <= 126)
 		ascii_buffer[(i+1)%16] = data_start[i+1];
-			// sprintf(ascii_buffer, "%c", data_start[i+1]);
 		else
 			ascii_buffer[(i+1)%16] = '.';
-			// sprintf(ascii_buffer, ".");
 	}
 	printf(" \"%s\"\n", ascii_buffer);
 }
@@ -250,24 +246,22 @@ void print_tcp_protocol(struct tcp_hdr* tcp_header, unsigned char* packet){
 	printf("TCP: \n\n");
 }
 
-//TODO: esse print de flags ta certo mesmo?
 void print_tcp_flags(struct tcp_hdr* tcp_header){
 	if(tcp_header->control_flags & 1<<5) printf("           ..1. .... = Urgent Pointer\n");
 	else printf("           ..0. .... = No Urgent Pointer\n");
-	// printf("           ..%u. .... = No Urgent Pointer\n", (tcp_header->control_flags & 1<<5)? 1 : 0);
+
 	if(tcp_header->control_flags & 1<<4) printf("           ...1 .... = Acknowledgement  \n");
 	else printf("           ...0 .... = No Acknowledgement  \n");
-	// printf("           ...%u .... = Acknowledgement  \n", (tcp_header->control_flags & 1<<4)? 1 : 0);
+
 	if(tcp_header->control_flags & 1<<3) printf("           .... 1... = Push          \n");
 	else printf("           .... 0... = No Push          \n");
-	// printf("           .... %u... = No Push          \n", (tcp_header->control_flags & 1<<3)? 1 : 0);
+
 	if(tcp_header->control_flags & 1<<2) printf("           .... .1.. = Reset         \n");
 	else printf("           .... .0.. = No Reset         \n");
-	// printf("           .... .%u.. = No Reset         \n", (tcp_header->control_flags & 1<<2)? 1 : 0);
+
 	if(tcp_header->control_flags & 1<<1) printf("           .... ..1. = Syn           \n");
 	else printf("           .... ..0. = No Syn           \n");
-	// printf("           .... ..%u. = No Syn           \n", (tcp_header->control_flags & 1<<1)? 1 : 0);
-	// printf("           .... ...%u = Fin           \n", (tcp_header->control_flags & 1   )? 1 : 0);
+
 	if(tcp_header->control_flags & 1) printf("           .... ...1 = Fin           \n");
 	else printf("           .... ...0 = No Fin           \n");
 }
