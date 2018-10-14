@@ -1,5 +1,6 @@
 #include "defines.h"
 #include "stack.h"
+#include "misc.h"
 #include <ctype.h>
 
 void compute_stack(/*unsigned char* packet,*/ struct stack_node** root, char** filters, unsigned int len){
@@ -47,9 +48,13 @@ void compute_stack(/*unsigned char* packet,*/ struct stack_node** root, char** f
     // primitives
     printf("O QUE TEM NO FILTRO:   %s\n", filters[i]); //DEBUG
     if(filters[i][2] == ':'){ // ethernet address
-
+      unsigned long int eth_addr;
+      eth_addr = get_ulint_ether_addr_from_string(filters[i]);
+      push(root, eth_addr);
     } else if(filters[i][1] == '.' || filters[i][2] == '.' || filters[i][3] == '.'){ // ip address
-
+      unsigned long int ip_addr;
+      ip_addr = (unsigned long int) inet_addr(filters[i]);
+      push(root, ip_addr);
     } else if(filters[i][0] == '0' && filters[i][1] == 'x'){ // hex number
       unsigned long int hex;
       hex = (unsigned long int)strtol(filters[i], NULL, 16);
@@ -123,9 +128,9 @@ void compute_stack(/*unsigned char* packet,*/ struct stack_node** root, char** f
       push(root, mod);
     }
 
-    // TODO: fora do calc, implementaremos os filtros de relacionados a protocolo
+    // OBS: fora do calc, implementaremos os filtros relacionados a protocolo
     else{
-      printf("to no ultima elsao\n");
+      printf("to no ultima elsao\n");// DEBUG
       push(root, 0);
     }
 
@@ -147,7 +152,6 @@ void compute_stack(/*unsigned char* packet,*/ struct stack_node** root, char** f
 int main(int argc, char** argv){
   char** filters = argv+1;
   struct stack_node* root = NULL;
-  // get_ulint_ip_addr_from_string(&root, filters, argc-1);
   compute_stack(&root, filters, argc-1);
   if(root == NULL) printf("Erro\n");
   printf("resultado: %lu\n", root->data);
