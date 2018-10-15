@@ -82,8 +82,8 @@ void print_ether_protocol(struct ether_hdr* eth, int packet_counter, int packet_
 void print_ip_protocol(struct ip_hdr* ip, int shouldnt_translate){
 	char protocol[4];
 
-	char* src_addr = get_address_as_string_from_uint(ip->ip_src);
-	char* dst_addr = get_address_as_string_from_uint(ip->ip_dst);
+	char* src_addr = get_address_as_string_from_uint(ntohl(ip->ip_src));
+	char* dst_addr = get_address_as_string_from_uint(ntohl(ip->ip_dst));
 
 
 	if(ip->ip_proto == TCP)
@@ -100,32 +100,42 @@ void print_ip_protocol(struct ip_hdr* ip, int shouldnt_translate){
 	printf("IP:   Version = %u, header length = %u bytes\n", ip->ip_v, ip->ip_hl);
 	printf("IP:   Type of service = %2u\n", ip->ip_tos);
 	print_ip_tos(ip->ip_tos);
-	printf("IP:   Total length = %u bytes\n", ip->ip_len);
-	printf("IP:   Identification = %u\n", ip->ip_id);
+	printf("IP:   Total length = %u bytes\n", ntohs(ip->ip_len));
+	printf("IP:   Identification = %u\n", ntohs(ip->ip_id));
 	printf("IP:   Flags = 0x%x\n", ip->ip_flags);
 	print_ip_flags(ip->ip_flags);
 	printf("IP:   Fragment offset = %u bytes\n", ip->ip_offset);
 	printf("IP:   Time to live = %u seconds/hops\n", ip->ip_ttl);
 	printf("IP:   Protocol = %u (%s)\n", ip->ip_proto, protocol);
-	printf("IP:   Header checksum = %4x\n", ip->ip_csum);
+	printf("IP:   Header checksum = %4x\n", ntohs(ip->ip_csum));
+
 	printf("IP:   Source address = %s", src_addr);
-	
 	if(shouldnt_translate == DONT_USE_OPTION){
 		char* t_src_addr = translate_address(src_addr);
-		char* t_dst_addr = translate_address(dst_addr);
+
 		if ((t_src_addr[3] == '.' || t_src_addr[2] == '.' || t_src_addr[1] == '.')
 		 && isdigit(t_src_addr[0]))
 			printf("\n"); // don't print the address unless it's actually translated
 		else printf(", %s\n", t_src_addr);
-			printf("IP:   Destination address = %s", dst_addr);
+	}
+	else{
+		printf("IP:   \n");
+	}
+
+	printf("IP:   Destination address = %s", dst_addr);
+	if(shouldnt_translate == DONT_USE_OPTION){
+		char* t_dst_addr = translate_address(dst_addr);
+
 		if ((t_dst_addr[3] == '.' || t_dst_addr[2] == '.' || t_dst_addr[1] == '.')
 		 && isdigit(t_dst_addr[0]))
 			printf("\n"); // don't print the address unless it's actually translated
 		else printf(", %s\n", t_dst_addr);
 			printf("IP:   \n");
 	}
-	else
+	else{
 		printf("IP:   \n");
+	}
+
 
 	free(src_addr);
 	free(dst_addr);
@@ -200,8 +210,8 @@ void print_udp_protocol(struct udp_hdr* udp, unsigned char* packet){
 	unsigned char* data_start = (packet+BYTES_UNTIL_BODY+BYTES_UNTIL_IP_DATA+BYTES_UNTIL_UDP_DATA);
 	printf("UDP:  ----- UDP Header -----\n");
 	printf("UDP:  \n");
-	printf("UDP:  Source port = %u\n", udp->src_port);
-	printf("UDP:  Destination port = %u\n", udp->dst_port);
+	printf("UDP:  Source port = %u\n", ntohs(udp->src_port));
+	printf("UDP:  Destination port = %u\n", ntohs(udp->dst_port));
 	printf("UDP:  Length = %u\n", udp->len);
 	printf("UDP:  Checksum = %4x\n", udp->checksum);
 	printf("UDP:  \n");
@@ -238,8 +248,8 @@ void print_tcp_protocol(struct tcp_hdr* tcp_header, unsigned char* packet){
 	unsigned char* data_start = (unsigned char*) (packet+BYTES_UNTIL_BODY+BYTES_UNTIL_IP_DATA+tcp_header->data_offset*4); //O data offset diz em words de 32 bits qual o tamanho da header tcp
 
 	printf("TCP:  ----- TCP Header -----\n");
-	printf("TCP:  Source port = %u\n", tcp_header->src_port);
-	printf("TCP:  Destination port = %u\n", tcp_header->dst_port);
+	printf("TCP:  Source port = %u\n", ntohs(tcp_header->src_port));
+	printf("TCP:  Destination port = %u\n", ntohs(tcp_header->dst_port));
 	printf("TCP:  Sequence Number = %u\n", tcp_header->seq_num);
 	printf("TCP:  Acknowledgement number = %u\n", tcp_header->ack_num);
 	printf("TCP:  Data offset = %u bytes\n", tcp_header->data_offset);

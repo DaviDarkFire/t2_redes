@@ -14,10 +14,10 @@ char * get_address_as_string_from_uint(unsigned int uint_address){
 	unsigned char first_byte, second_byte, third_byte, fourth_byte;
 	char* char_address = malloc(sizeof(char)*15);
 
-	fourth_byte = ((uint_address>>24)&0xFF);
-	third_byte = ((uint_address>>16)&0xFF);
-	second_byte = ((uint_address>>8)&0xFF);
-	first_byte = (uint_address&0xFF);
+	first_byte = ((uint_address>>24)&0xFF);
+	second_byte = ((uint_address>>16)&0xFF);
+	third_byte = ((uint_address>>8)&0xFF);
+	fourth_byte = (uint_address&0xFF);
 
 	sprintf(char_address, "%d.%d.%d.%d", first_byte, second_byte, third_byte, fourth_byte);
 

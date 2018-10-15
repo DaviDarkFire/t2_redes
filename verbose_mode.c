@@ -5,8 +5,8 @@
 void print_ip_packet_verbose(unsigned char* packet, struct ip_hdr* ip_header, int shouldnt_translate){
 	print_current_time();
 
-	char* src_address = get_address_as_string_from_uint(ip_header->ip_src);
-	char* dst_address = get_address_as_string_from_uint(ip_header->ip_dst);
+	char* src_address = get_address_as_string_from_uint(ntohl(ip_header->ip_src));
+	char* dst_address = get_address_as_string_from_uint(ntohl(ip_header->ip_dst));
 
 	if(shouldnt_translate == DONT_USE_OPTION){ // translate addresses
 		char* translated_src = translate_address(src_address);
@@ -39,7 +39,7 @@ void print_ip_packet_verbose(unsigned char* packet, struct ip_hdr* ip_header, in
 		struct udp_hdr* udp_header = build_udp_header(packet);
 		struct servent *sptr;
 
-		sptr = getservbyport(htons(udp_header->src_port), "udp");
+		sptr = getservbyport(udp_header->src_port, "udp");
 
 		printf("UDP ");
 		if(sptr!=NULL) printf("%s ", sptr->s_name);

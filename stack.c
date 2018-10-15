@@ -180,13 +180,13 @@ void compute_stack(unsigned char* packet, struct stack_node** root, char** filte
 
     else if (strcmp(filters[i], "ipto") == 0){
         if (isIP)
-            push(root, (unsigned long int)ip->ip_dst);
+            push(root, (unsigned long int)ntohl(ip->ip_dst));
         else
             push(root,0);
 
     }else if (strcmp(filters[i], "ipfrom") == 0){
         if (isIP){
-            push(root, (unsigned long int) ip->ip_src);
+            push(root, (unsigned long int) ntohl(ip->ip_src));
         }else{
             push(root,0);
         }
@@ -202,13 +202,13 @@ void compute_stack(unsigned char* packet, struct stack_node** root, char** filte
 
     else if (strcmp(filters[i], "udptoport") == 0){
         if (isUDP)
-            push(root, (unsigned long int)udp->dst_port);
+            push(root, (unsigned long int)ntohs(udp->dst_port));
         else
             push(root,0);
 
     }else if (strcmp(filters[i], "udpfromport") == 0){
         if (isUDP)
-            push(root, (unsigned long int)udp->src_port);
+            push(root, (unsigned long int)ntohs(udp->src_port));
         else
             push(root,0);
     }
@@ -217,13 +217,13 @@ void compute_stack(unsigned char* packet, struct stack_node** root, char** filte
 
     else if (strcmp(filters[i], "tcptoport") == 0){
         if (isTCP)
-            push(root, (unsigned long int)tcp->dst_port);
+            push(root, (unsigned long int)ntohs(tcp->dst_port));
         else
             push(root,0);
 
     }else if (strcmp(filters[i], "tcpfromport") == 0){
         if (isTCP)
-            push(root, (unsigned long int)tcp->src_port);
+            push(root, (unsigned long int)ntohs(tcp->src_port));
         else
             push(root,0);
     }
