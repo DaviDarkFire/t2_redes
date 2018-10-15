@@ -57,7 +57,7 @@ void print_ip_packet_verbose(unsigned char* packet, struct ip_hdr* ip_header, in
 
 void print_arp_packet_verbose(unsigned char* packet, int shouldnt_translate){
 	struct arp_hdr* arp_header = (struct arp_hdr*) (packet+BYTES_UNTIL_BODY);
-	char* src_address = get_address_as_string_from_uint(arp_header->sender_proto_addr);
+	char* src_address = get_address_as_string_from_uint(ntohl(arp_header->sender_proto_addr));
 	char* dst_address = "255.255.255.255";
 
 	print_current_time();
@@ -78,12 +78,12 @@ void print_arp_packet_verbose(unsigned char* packet, int shouldnt_translate){
 	free(src_address);
 	free(dst_address);
 
-	if(arp_header->opcode == ARP_REQUEST){
-		char* target_addr = get_address_as_string_from_uint(arp_header->target_proto_addr);
+	if(ntohs(arp_header->opcode) == ARP_REQUEST){
+		char* target_addr = get_address_as_string_from_uint(ntohl(arp_header->target_proto_addr));
 		printf("Who is %s", target_addr);
 		free (target_addr);
 		printf("\n");
-	} else if (arp_header->opcode == ARP_RESPONSE){
+	} else if (ntohs(arp_header->opcode) == ARP_RESPONSE){
 		printf("I'm not really sure who this is");
 		printf("\n");
 	}

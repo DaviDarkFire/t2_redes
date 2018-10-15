@@ -299,18 +299,24 @@ void print_icmp_protocol(struct icmp_hdr* icmp){
 
 
 void print_arp_protocol(struct arp_hdr* arp){
-	char* sdr_hw_addr = get_address_as_string_from_uint(arp->sender_hw_addr);
-	char* sdr_pt_addr = get_address_as_string_from_uint(arp->sender_proto_addr);
-	char* tgt_hw_addr = get_address_as_string_from_uint(arp->target_hw_addr);
-	char* tgt_pt_addr = get_address_as_string_from_uint(arp->target_proto_addr);
+	char* sdr_hw_addr;
+	sprintf(sdr_hw_addr, "%x:%x:%x:%x:%x:%x",
+	 arp->sender_hw_addr[5], arp->sender_hw_addr[4], arp->sender_hw_addr[3],
+	 arp->sender_hw_addr[2], arp->sender_hw_addr[1], arp->sender_hw_addr[0]);
+	char* sdr_pt_addr = get_address_as_string_from_uint(ntohl(arp->sender_proto_addr));
+	char* tgt_hw_addr;
+	sprintf(sdr_hw_addr, "%x:%x:%x:%x:%x:%x",
+	 arp->target_hw_addr[5], arp->target_hw_addr[4], arp->target_hw_addr[3],
+	 arp->target_hw_addr[2], arp->target_hw_addr[1], arp->target_hw_addr[0]);
+	char* tgt_pt_addr = get_address_as_string_from_uint(ntohl(arp->target_proto_addr));
 
 	printf("ARP:  ----- ARP/RARP Frame -----\n");
 	printf("ARP:  \n");
-	printf("ARP:  Hardware type = %u\n", arp->hardware_type);
-	printf("ARP:  Protocol type = %u\n", arp->protocol_type);
+	printf("ARP:  Hardware type = %u\n", ntohs(arp->hardware_type));
+	printf("ARP:  Protocol type = %u\n", ntohs(arp->protocol_type));
 	printf("ARP:  Length of hardware address = %u bytes\n", arp->hw_addr_len);
 	printf("ARP:  Length of protocol address = %u bytes\n", arp->proto_addr_len);
-	printf("ARP:  Opcode %u\n", arp->opcode);
+	printf("ARP:  Opcode %u\n", ntohs(arp->opcode));
 	printf("ARP:  Sender's hardware address = %s\n", sdr_hw_addr);
 	printf("ARP:  Sender's protocol address = %s\n", sdr_pt_addr);
 	printf("ARP:  Target hardware address = %s\n", tgt_hw_addr);

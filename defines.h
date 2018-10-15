@@ -103,9 +103,9 @@ struct arp_hdr {
 	unsigned char hw_addr_len;
 	unsigned char proto_addr_len;
 	unsigned short opcode;
-	unsigned short sender_hw_addr;
+	unsigned char sender_hw_addr[6];
 	unsigned int sender_proto_addr;
-	unsigned int target_hw_addr;
+	unsigned char target_hw_addr[6];
 	unsigned int target_proto_addr;
 };
 
