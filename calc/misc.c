@@ -106,21 +106,38 @@ unsigned long int get_ulint_ether_addr_from_string(char* str_addr){
 	int shift_bits = 40;
 	int i;
 	unsigned long int ulint_addr = 0;
+	unsigned long int aux;
 
-	printf("próxima linha é o sscanf\n"); // DEBUG
 	sscanf(str_addr, "%x:%x:%x:%x:%x:%x",
 	&values[0], &values[1], &values[2],
 	&values[3], &values[4], &values[5]);
 
-	printf("v0: %d, v1: %d, v2: %d, v3: %d, v4: %d, v5: %d\n",
-	values[0], values[1], values[2],
-	values[3], values[4], values[5]);
-
 	for(i = 0; i < 6; i++){
-		ulint_addr = ulint_addr | (values[i] << shift_bits);
-		printf("i: %d, ulint_addr: %lu\n", i, ulint_addr); // DEBUG
+		aux = values[i];
+		ulint_addr = ulint_addr | (aux << shift_bits); // trocar shift para shift bits
+		printBits(sizeof(values[i]), &values[i]);
+		printBits(sizeof(ulint_addr), &ulint_addr);
 		shift_bits = shift_bits-8;
 	}
-	printf("saí do for que preenche o ulint\n"); // DEBUG
+	return ulint_addr;
+}
+
+unsigned long int get_ulint_ip_addr_from_string(char* str_addr){
+	int values[4];
+	int shift_bits = 24;
+	int i;
+	unsigned long int ulint_addr = 0;
+	unsigned long int aux;
+
+	sscanf(str_addr, "%d.%d.%d.%d",
+	&values[0], &values[1], &values[2], &values[3]);
+
+	for(i = 0; i < 4; i++){
+		aux = values[i];
+		ulint_addr = ulint_addr | (aux << shift_bits);
+		printBits(sizeof(values[i]), &values[i]);
+		printBits(sizeof(ulint_addr), &ulint_addr);
+		shift_bits = shift_bits-8;
+	}
 	return ulint_addr;
 }

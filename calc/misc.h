@@ -13,5 +13,6 @@
   int get_packet_size(unsigned char* packet);
   void printBits(size_t const size, void const * const ptr); // DEBUG tirar quando trabalho acabar
   unsigned long int get_ulint_ether_addr_from_string(char* str_addr);
+  unsigned long int get_ulint_ip_addr_from_string(char* str_addr);
 
 #endif

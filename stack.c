@@ -2,6 +2,7 @@
 
 #include "defines.h"
 #include "stack.h"
+#include "misc.h"
 
 struct stack_node* new_node(unsigned long int data){
     struct stack_node* node =
@@ -44,11 +45,11 @@ void compute_stack(unsigned char* packet, struct stack_node** root, char** filte
   unsigned int i;
   struct ether_hdr* eth = (struct ether_hdr*) packet;
 
-  struct ip_hdr* ip;
-  struct tcp_hdr* tcp;
-  struct udp_hdr* udp;
-  struct icmp_hdr* icmp;
-  struct arp_hdr* arp;
+  struct ip_hdr* ip = build_ip_header(packet);
+  struct tcp_hdr* tcp = build_tcp_header(packet);
+  struct udp_hdr* udp = build_udp_header(packet);
+  struct icmp_hdr* icmp = build_icmp_header(packet);
+  struct arp_hdr* arp = build_arp_header(packet);
 
   char isIP = 0, isARP = 0, isTCP = 0, isUDP = 0, isICMP = 0;
 
@@ -57,17 +58,17 @@ void compute_stack(unsigned char* packet, struct stack_node** root, char** filte
     isIP = 1;
     switch(ip->ip_proto){
         case TCP:
-          tcp = (struct tcp_hdr*) (packet+BYTES_UNTIL_BODY+BYTES_UNTIL_IP_DATA);
+        //   tcp = (struct tcp_hdr*) (packet+BYTES_UNTIL_BODY+BYTES_UNTIL_IP_DATA);
           isTCP = 1;
         break;
 
         case UDP:
-          udp = (struct udp_hdr*) (packet+BYTES_UNTIL_BODY+BYTES_UNTIL_IP_DATA);
+        //   udp = (struct udp_hdr*) (packet+BYTES_UNTIL_BODY+BYTES_UNTIL_IP_DATA);
           isUDP = 1;
         break;
 
         case ICMP:
-          icmp = (struct icmp_hdr*) (packet+BYTES_UNTIL_BODY+BYTES_UNTIL_IP_DATA);
+        //   icmp = (struct icmp_hdr*) (packet+BYTES_UNTIL_BODY+BYTES_UNTIL_IP_DATA);
           isICMP = 1;
         break;
 
@@ -76,7 +77,7 @@ void compute_stack(unsigned char* packet, struct stack_node** root, char** filte
     }
   } else {
     if(eth->ether_type == htons(0x806)){ //ARP
-      arp = (struct arp_hdr*) (packet+BYTES_UNTIL_BODY);
+    //   arp = (struct arp_hdr*) (packet+BYTES_UNTIL_BODY);
       isARP = 1;
     }
   }
@@ -85,15 +86,19 @@ void compute_stack(unsigned char* packet, struct stack_node** root, char** filte
     // primitives
     printf("O QUE TEM NO FILTRO:   %s\n", filters[i]); //DEBUG
     if(filters[i][2] == ':'){ // ethernet address
-
+      unsigned long int eth_addr;
+      eth_addr = get_ulint_ether_addr_from_string(filters[i]);
+      push(root, eth_addr);
     } else if(filters[i][1] == '.' || filters[i][2] == '.' || filters[i][3] == '.'){ // ip address
-
+      unsigned long int ip_addr;
+      ip_addr = get_ulint_ip_addr_from_string(filters[i]);
+      push(root, ip_addr);
     } else if(filters[i][0] == '0' && filters[i][1] == 'x'){ // hex number
-      unsigned long int hex;
-      hex = (unsigned long int)strtol(filters[i], NULL, 16);
-      push(root, hex);
+        unsigned long int hex;
+        hex = (unsigned long int)strtol(filters[i], NULL, 16);
+        push(root, hex);
     } else if(isdigit(filters[i][0])){ // dec number
-      push(root, atoi(filters[i]));
+        push(root, atoi(filters[i]));
     }
 
     // L&A Operators
@@ -192,15 +197,18 @@ void compute_stack(unsigned char* packet, struct stack_node** root, char** filte
 
     else if (strcmp(filters[i], "ipto") == 0){
         if (isIP)
-            push(root, (unsigned long int)ip->ip_src);
+            push(root, (unsigned long int)ip->ip_dst);
         else
             push(root,0);
 
     }else if (strcmp(filters[i], "ipfrom") == 0){
-        if (isIP)
-            push(root, (unsigned long int)ip->ip_dst);
-        else
+        if (isIP){
+            printf("ip->ip_src: %lu\n", (unsigned long int)ip->ip_src);// DEBUG
+            printf("IP source%s\n", get_address_as_string_from_uint(ip->ip_src));
+            push(root, (unsigned long int) ip->ip_src);
+        }else{
             push(root,0);
+        }
     }else if (strcmp(filters[i], "ipproto") == 0){
         if (isIP)
             push(root, (unsigned long int)ip->ip_proto);

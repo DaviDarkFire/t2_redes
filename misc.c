@@ -101,22 +101,39 @@ void printBits(size_t const size, void const * const ptr)
     puts("");
 }
 
-unsigned long int get_ulint_ip_addr_from_string(char* address){
-	char number[3];
-	unsigned long int ulint_addr;
-	int i_number;
-	int shift_bits = 3*8; // at first, shift 3 bytes
+unsigned long int get_ulint_ether_addr_from_string(char* str_addr){
+	int values[6];
+	int shift_bits = 40;
 	int i;
-	for (i = 0; i < strlen(address); i++){
-		if (address[i] != '.'){
-			// strcat(number, address[i]);
-			number[i%3] = address[i];
-		}else{ // found a .
-			i_number = atoi(number);
-			ulint_addr = i_number << shift_bits;
-			shift_bits = shift_bits - 8;
-			memset(number, 0, sizeof(number));
-		}
+	unsigned long int ulint_addr = 0;
+	unsigned long int aux;
+
+	sscanf(str_addr, "%x:%x:%x:%x:%x:%x",
+	&values[0], &values[1], &values[2],
+	&values[3], &values[4], &values[5]);
+
+	for(i = 0; i < 6; i++){
+		aux = values[i];
+		ulint_addr = ulint_addr | (aux << shift_bits); // trocar shift para shift bits
+		shift_bits = shift_bits-8;
+	}
+	return ulint_addr;
+}
+
+unsigned long int get_ulint_ip_addr_from_string(char* str_addr){
+	int values[4];
+	int shift_bits = 24;
+	int i;
+	unsigned long int ulint_addr = 0;
+	unsigned long int aux;
+
+	sscanf(str_addr, "%d.%d.%d.%d",
+	&values[0], &values[1], &values[2], &values[3]);
+
+	for(i = 0; i < 4; i++){
+		aux = values[i];
+		ulint_addr = ulint_addr | (aux << shift_bits);
+		shift_bits = shift_bits-8;
 	}
 	return ulint_addr;
 }

@@ -53,7 +53,7 @@ void compute_stack(/*unsigned char* packet,*/ struct stack_node** root, char** f
       push(root, eth_addr);
     } else if(filters[i][1] == '.' || filters[i][2] == '.' || filters[i][3] == '.'){ // ip address
       unsigned long int ip_addr;
-      ip_addr = (unsigned long int) inet_addr(filters[i]);
+      ip_addr = get_ulint_ip_addr_from_string(filters[i]);
       push(root, ip_addr);
     } else if(filters[i][0] == '0' && filters[i][1] == 'x'){ // hex number
       unsigned long int hex;
