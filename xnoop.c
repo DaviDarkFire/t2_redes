@@ -86,7 +86,7 @@ void do_process(unsigned char* packet, int len, struct options* opt, char** filt
 		printf("Capturing packets... Ctrl+C to exit. \n");
     	basic_mode(eth, packet, opt);
   } else if(opt->mode == VERBOSE_MODE){
-  	verbose_mode(eth, packet, opt);
+  	verbose_mode(eth, packet, opt, filters, filters_len);
 
   } else if(opt->mode == EXTENDED_VERBOSE_MODE){
   	extended_verbose_mode(eth, packet, opt, filters, filters_len);

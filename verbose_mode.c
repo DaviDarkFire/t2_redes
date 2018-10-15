@@ -89,11 +89,18 @@ void print_arp_packet_verbose(unsigned char* packet, int shouldnt_translate){
 	}
 }
 
-void verbose_mode(struct ether_hdr* eth, unsigned char* packet, struct options* opt){
+void verbose_mode(struct ether_hdr* eth, unsigned char* packet, struct options* opt, char** filters, unsigned int filters_len){
 	static int packet_counter = 0;
 
 	if(packet_counter == opt->show_n_first_packets)
 		exit(0);
+
+	if (filters_len > 0){
+		struct stack_node* root = NULL;			compute_stack(packet, &root ,filters, filters_len);
+		if (peek(root) == 0) return;
+
+	}
+
 
 	packet_counter++;
 

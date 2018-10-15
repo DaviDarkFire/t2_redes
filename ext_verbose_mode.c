@@ -25,7 +25,7 @@ void extended_verbose_mode(struct ether_hdr* eth, unsigned char* packet, struct 
 		struct ip_hdr* ip_header;
 		ip_header = build_ip_header(packet);
 
-		print_ip_protocol(ip_header);
+		print_ip_protocol(ip_header, opt->shouldnt_translate_names);
 
 		if(ip_header->ip_proto == ICMP){ // IP-ICMP
 			struct icmp_hdr* icmp_header;
@@ -79,13 +79,12 @@ void print_ether_protocol(struct ether_hdr* eth, int packet_counter, int packet_
 	printf("ETHER: \n");
 }
 
-void print_ip_protocol(struct ip_hdr* ip){
+void print_ip_protocol(struct ip_hdr* ip, int shouldnt_translate){
 	char protocol[4];
 
 	char* src_addr = get_address_as_string_from_uint(ip->ip_src);
 	char* dst_addr = get_address_as_string_from_uint(ip->ip_dst);
-	char* t_src_addr = translate_address(src_addr);
-	char* t_dst_addr = translate_address(dst_addr);
+
 
 	if(ip->ip_proto == TCP)
 		strcpy(protocol,"TCP");
@@ -110,15 +109,22 @@ void print_ip_protocol(struct ip_hdr* ip){
 	printf("IP:   Protocol = %u (%s)\n", ip->ip_proto, protocol);
 	printf("IP:   Header checksum = %4x\n", ip->ip_csum);
 	printf("IP:   Source address = %s", src_addr);
-	if ((t_src_addr[3] == '.' || t_src_addr[2] == '.' || t_src_addr[1] == '.')
-	 && isdigit(t_src_addr[0]))
-		printf("\n"); // don't print the address unless it's actually translated
-	else printf(", %s\n", t_src_addr);
-		printf("IP:   Destination address = %s", dst_addr);
-	if ((t_dst_addr[3] == '.' || t_dst_addr[2] == '.' || t_dst_addr[1] == '.')
-	 && isdigit(t_dst_addr[0]))
-		printf("\n"); // don't print the address unless it's actually translated
-	else printf(", %s\n", t_dst_addr);
+	
+	if(shouldnt_translate == DONT_USE_OPTION){
+		char* t_src_addr = translate_address(src_addr);
+		char* t_dst_addr = translate_address(dst_addr);
+		if ((t_src_addr[3] == '.' || t_src_addr[2] == '.' || t_src_addr[1] == '.')
+		 && isdigit(t_src_addr[0]))
+			printf("\n"); // don't print the address unless it's actually translated
+		else printf(", %s\n", t_src_addr);
+			printf("IP:   Destination address = %s", dst_addr);
+		if ((t_dst_addr[3] == '.' || t_dst_addr[2] == '.' || t_dst_addr[1] == '.')
+		 && isdigit(t_dst_addr[0]))
+			printf("\n"); // don't print the address unless it's actually translated
+		else printf(", %s\n", t_dst_addr);
+			printf("IP:   \n");
+	}
+	else
 		printf("IP:   \n");
 
 	free(src_addr);
