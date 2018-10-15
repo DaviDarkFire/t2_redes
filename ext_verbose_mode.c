@@ -212,7 +212,7 @@ void print_udp_protocol(struct udp_hdr* udp, unsigned char* packet){
 	printf("UDP:  \n");
 	printf("UDP:  Source port = %u\n", ntohs(udp->src_port));
 	printf("UDP:  Destination port = %u\n", ntohs(udp->dst_port));
-	printf("UDP:  Length = %u\n", udp->len);
+	printf("UDP:  Length = %u\n", ntohs(udp->len));
 	printf("UDP:  Checksum = %4x\n", ntohs(udp->checksum));
 	printf("UDP:  \n");
 	printf("UDP: Data: First 64 bytes\n");
