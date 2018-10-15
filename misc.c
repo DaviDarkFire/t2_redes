@@ -193,3 +193,11 @@ char* get_icmp_type_string(unsigned char type){
 	}
 	return type_string;
 }
+
+// Print an Ethernet address
+void print_eth_address(char *s, unsigned char *eth_addr)
+{
+	printf("%s %02X:%02X:%02X:%02X:%02X:%02X", s,
+	       eth_addr[0], eth_addr[1], eth_addr[2],
+	       eth_addr[3], eth_addr[4], eth_addr[5]);
+}

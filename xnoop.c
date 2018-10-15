@@ -1,60 +1,16 @@
 #include "defines.h"
 #include "struct_dealer.h"
+#include "basic_mode.h"
 #include "verbose_mode.h"
 #include "ext_verbose_mode.h"
 #include "misc.h"
 
 // headers
-void flag_setter();
-void basic_mode(struct ether_hdr* eth, unsigned char* packet, struct options* opt);
 int bind_iface_name(int fd, char *iface_name);
-void print_eth_address(char *s, unsigned char *eth_addr);
-struct ip_hdr* build_ip_header(unsigned char* packet);
 void do_process(unsigned char* packet, int len, struct options* opt, char** filters, unsigned int filters_len);
 void print_usage();
 // end of headers
 
-volatile sig_atomic_t flag = 0;
-void flag_setter(){
-	flag = 1;
-}
-
-void basic_mode(struct ether_hdr* eth, unsigned char* packet, struct options* opt){
-  static struct statistics stat;
-
-  if(flag == 1){
-    print_statistics(&stat);
-    printf("END OF EXECUTION\n");
-    exit(0);
-  }
-
-  stat.ethernet_frames += 1;
-
-	int n_of_ffs = 0;
-	int i;
-
-	for(i = 0; i < 6; i++){
-		if(eth->ether_dhost[i] == 0xff) n_of_ffs++;
-	}
-
-	if(n_of_ffs == 6){
-		stat.ethernet_broadcast++;
-	}else{
-		if(memcmp(get_mac_adress(opt->iface), eth->ether_dhost, 6) == 0)
-    		stat.to_this_host++;
-		 }
-
-	if(eth->ether_type == htons(0x0800)) { //IP
-		stat.ip++;
-		struct ip_hdr* ip_header;
-		ip_header = build_ip_header(packet);
-		if(ip_header->ip_proto == ICMP) stat.icmp++; // IP-ICMP
-		else if(ip_header->ip_proto == UDP) stat.udp++; // IP-UDP
-		else if(ip_header->ip_proto == TCP) stat.tcp++; // IP-TCP
-	} else if(eth->ether_type == htons(0x0806)) { // ARP
-		stat.arp++;
-	}
-}
 
 // Bind a socket to a interface
 int bind_iface_name(int fd, char *iface_name)
@@ -62,14 +18,6 @@ int bind_iface_name(int fd, char *iface_name)
 	return setsockopt(fd, SOL_SOCKET, SO_BINDTODEVICE, iface_name, strlen(iface_name));
 }
 /* */
-// Print an Ethernet address
-void print_eth_address(char *s, unsigned char *eth_addr)
-{
-	printf("%s %02X:%02X:%02X:%02X:%02X:%02X", s,
-	       eth_addr[0], eth_addr[1], eth_addr[2],
-	       eth_addr[3], eth_addr[4], eth_addr[5]);
-}
-
 
 
 /* */
