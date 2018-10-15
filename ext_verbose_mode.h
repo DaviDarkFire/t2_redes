@@ -11,6 +11,5 @@
   void print_tcp_protocol(struct tcp_hdr* tcp_header,unsigned char* packet);
   void print_tcp_flags(struct tcp_hdr* tcp_header);
   void print_icmp_protocol(struct icmp_hdr* icmp);
-  char* get_icmp_type_string(unsigned char type);
   void print_arp_protocol(struct arp_hdr* arp);
 #endif

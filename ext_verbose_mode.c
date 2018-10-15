@@ -28,19 +28,16 @@ void extended_verbose_mode(struct ether_hdr* eth, unsigned char* packet, struct 
 		print_ip_protocol(ip_header);
 
 		if(ip_header->ip_proto == ICMP){ // IP-ICMP
-			// printf("This is an ICMP Packet.\n");// DEBUG
 			struct icmp_hdr* icmp_header;
 			icmp_header = build_icmp_header(packet);
 			print_icmp_protocol(icmp_header);
 		}
 		else if(ip_header->ip_proto == UDP){ // IP-UDP
-			// printf("This is an UDP Packet.\n");// DEBUG
 			struct udp_hdr* udp_header;
 			udp_header = build_udp_header(packet);
 			print_udp_protocol(udp_header, packet);
 		}
 		else if(ip_header->ip_proto == TCP){ // IP-TCP
-			// printf("This is a TCP Packet.\n");// DEBUG
 			struct tcp_hdr* tcp_header =  build_tcp_header(packet);
 			print_tcp_protocol(tcp_header, packet);
 		}
@@ -48,7 +45,6 @@ void extended_verbose_mode(struct ether_hdr* eth, unsigned char* packet, struct 
 			printf("This analyzer doesn't know this packet's protocol.\n\n");
 		}
 	} else if(eth->ether_type == htons(0x0806)) { // ARP
-		// printf("This is an ARP Packet.\n");// DEBUG
 		struct arp_hdr* arp_header;
 		arp_header = build_arp_header(packet);
 		print_arp_protocol(arp_header);
@@ -114,12 +110,16 @@ void print_ip_protocol(struct ip_hdr* ip){
 	printf("IP:   Protocol = %u (%s)\n", ip->ip_proto, protocol);
 	printf("IP:   Header checksum = %4x\n", ip->ip_csum);
 	printf("IP:   Source address = %s", src_addr);
-	if (t_src_addr[3] == '.' && isdigit(t_src_addr[0])) printf("\n"); // don't print the address unless it's actually translated
+	if ((t_src_addr[3] == '.' || t_src_addr[2] == '.' || t_src_addr[1] == '.')
+	 && isdigit(t_src_addr[0]))
+		printf("\n"); // don't print the address unless it's actually translated
 	else printf(", %s\n", t_src_addr);
-	printf("IP:   Destination address = %s", dst_addr);
-	if (t_dst_addr[3] == '.' && isdigit(t_dst_addr[0])) printf("\n"); // don't print the address unless it's actually translated
+		printf("IP:   Destination address = %s", dst_addr);
+	if ((t_dst_addr[3] == '.' || t_dst_addr[2] == '.' || t_dst_addr[1] == '.')
+	 && isdigit(t_dst_addr[0]))
+		printf("\n"); // don't print the address unless it's actually translated
 	else printf(", %s\n", t_dst_addr);
-	printf("IP:   \n");
+		printf("IP:   \n");
 
 	free(src_addr);
 	free(dst_addr);
@@ -242,7 +242,7 @@ void print_tcp_protocol(struct tcp_hdr* tcp_header, unsigned char* packet){
 	printf("TCP:  Window = %u\n", tcp_header->window_size);
 	printf("TCP:  Checksum = %4x\n", tcp_header->checksum);
 	printf("TCP:  Urgent pointer = %u\n", tcp_header->urgent_pointer);
-	printf("TCP:  No Options\n"); // TODO: DEPOIS TEM QUE VER O QUE VAI SER FEITO COM ESSE CAMPO
+	printf("TCP:  No Options\n");
 	printf("TCP: Data: (first 64 bytes)\n");
 	print_64_data_bytes("TCP", data_start);
 	printf("TCP: \n\n");
@@ -280,62 +280,7 @@ void print_icmp_protocol(struct icmp_hdr* icmp){
 	free(type_string);
 }
 
-char* get_icmp_type_string(unsigned char type){
-	char* type_string;
-	type_string = malloc(sizeof(char)*32);
-	switch(type){
-		case 0:
-			strcpy(type_string, "Echo reply");
-		break;
 
-		case 3:
-			strcpy(type_string, "Destination unreachable");
-		break;
-
-		case 5:
-			strcpy(type_string, "Redirect message");
-		break;
-
-		case 8:
-			strcpy(type_string, "Echo request");
-		break;
-
-		case 9:
-			strcpy(type_string, "Router advertisement");
-		break;
-
-		case 10:
-			strcpy(type_string, "Router solicitation");
-		break;
-
-		case 11:
-			strcpy(type_string, "Time exceeded");
-		break;
-
-		case 12:
-			strcpy(type_string, "Parameter problem: bad IP header");
-		break;
-
-		case 13:
-			strcpy(type_string, "Timestamp");
-		break;
-
-		case 14:
-			strcpy(type_string, "Timestamp reply");
-		break;
-
-		case 42:
-			strcpy(type_string, "Extended echo request");
-		break;
-
-		case 43:
-			strcpy(type_string, "Extended echo reply");
-		break;
-
-		default: strcpy(type_string, "Unknown");
-	}
-	return type_string;
-}
 
 void print_arp_protocol(struct arp_hdr* arp){
 	char* sdr_hw_addr = get_address_as_string_from_uint(arp->sender_hw_addr);

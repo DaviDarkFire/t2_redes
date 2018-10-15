@@ -11,8 +11,8 @@
   struct icmp_hdr* build_icmp_header(unsigned char* packet);
   char* translate_address(char* address);
   int get_packet_size(unsigned char* packet);
-  void printBits(size_t const size, void const * const ptr); // DEBUG tirar quando trabalho acabar
+  void printBits(size_t const size, void const * const ptr); 
   unsigned long int get_ulint_ether_addr_from_string(char* str_addr);
   unsigned long int get_ulint_ip_addr_from_string(char* str_addr);
-
+  char* get_icmp_type_string(unsigned char type);
 #endif

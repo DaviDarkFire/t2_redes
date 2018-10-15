@@ -83,7 +83,6 @@ int get_packet_size(unsigned char* packet){
     return sizeof(packet);
 }
 
-//DEBUG esta função só serve para vermos bits das variáveis enquanto implementamos, tirar quando terminar trabalho
 void printBits(size_t const size, void const * const ptr)
 {
     unsigned char *b = (unsigned char*) ptr;
@@ -114,7 +113,7 @@ unsigned long int get_ulint_ether_addr_from_string(char* str_addr){
 
 	for(i = 0; i < 6; i++){
 		aux = values[i];
-		ulint_addr = ulint_addr | (aux << shift_bits); // trocar shift para shift bits
+		ulint_addr = ulint_addr | (aux << shift_bits);
 		shift_bits = shift_bits-8;
 	}
 	return ulint_addr;
@@ -136,4 +135,61 @@ unsigned long int get_ulint_ip_addr_from_string(char* str_addr){
 		shift_bits = shift_bits-8;
 	}
 	return ulint_addr;
+}
+
+char* get_icmp_type_string(unsigned char type){
+	char* type_string;
+	type_string = malloc(sizeof(char)*32);
+	switch(type){
+		case 0:
+			strcpy(type_string, "Echo reply");
+		break;
+
+		case 3:
+			strcpy(type_string, "Destination unreachable");
+		break;
+
+		case 5:
+			strcpy(type_string, "Redirect message");
+		break;
+
+		case 8:
+			strcpy(type_string, "Echo request");
+		break;
+
+		case 9:
+			strcpy(type_string, "Router advertisement");
+		break;
+
+		case 10:
+			strcpy(type_string, "Router solicitation");
+		break;
+
+		case 11:
+			strcpy(type_string, "Time exceeded");
+		break;
+
+		case 12:
+			strcpy(type_string, "Parameter problem: bad IP header");
+		break;
+
+		case 13:
+			strcpy(type_string, "Timestamp");
+		break;
+
+		case 14:
+			strcpy(type_string, "Timestamp reply");
+		break;
+
+		case 42:
+			strcpy(type_string, "Extended echo request");
+		break;
+
+		case 43:
+			strcpy(type_string, "Extended echo reply");
+		break;
+
+		default: strcpy(type_string, "Unknown");
+	}
+	return type_string;
 }

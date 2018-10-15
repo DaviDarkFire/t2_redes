@@ -60,9 +60,13 @@ struct ip_hdr {
 	unsigned char	ip_tos;					// Type of service
 	unsigned short	ip_len;				// Datagram Length
 	unsigned short	ip_id;				// Datagram identifier
-	// TODO: talvez tenha que fazer esquema do bigendian x lil endian aqui
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+unsigned short	ip_offset:13,		// Fragment offset
+								ip_flags:3;	// Flags
+#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
 	unsigned short	ip_flags:3,		// Flags
 									ip_offset:13;	// Fragment offset
+#endif
 	unsigned char	ip_ttl;					// Time To Live
 	unsigned char	ip_proto;				// Protocol
 	unsigned short	ip_csum;			// Header checksum
@@ -75,8 +79,11 @@ struct tcp_hdr {
 	unsigned short dst_port;
 	unsigned int seq_num;
 	unsigned int ack_num;
-	// TODO: talvez tenha que fazer esquema do bigendian x lil endian aqui
-	unsigned short data_offset:4, reserved:3, control_flags: 9;
+	#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+		unsigned short control_flags: 9, reserved:3, data_offset: 4;
+	#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+		unsigned short data_offset: 4, reserved:3, control_flags: 9;
+	#endif
 	unsigned short window_size;
 	unsigned short checksum;
 	unsigned short urgent_pointer;

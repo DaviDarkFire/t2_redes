@@ -20,7 +20,6 @@ void push(struct stack_node** root, unsigned long int data){
     struct stack_node* node = new_node(data);
     node->next = *root;
     *root = node;
-    printf("%lu pushed to stack\n", data); //DEBUG
 }
 
 unsigned long int pop(struct stack_node** root){
@@ -31,7 +30,6 @@ unsigned long int pop(struct stack_node** root){
     unsigned long int popped = temp->data;
     free(temp);
 
-    printf("%lu popped from stack\n", popped); //DEBUG
     return popped;
 }
 
@@ -58,17 +56,14 @@ void compute_stack(unsigned char* packet, struct stack_node** root, char** filte
     isIP = 1;
     switch(ip->ip_proto){
         case TCP:
-        //   tcp = (struct tcp_hdr*) (packet+BYTES_UNTIL_BODY+BYTES_UNTIL_IP_DATA);
           isTCP = 1;
         break;
 
         case UDP:
-        //   udp = (struct udp_hdr*) (packet+BYTES_UNTIL_BODY+BYTES_UNTIL_IP_DATA);
           isUDP = 1;
         break;
 
         case ICMP:
-        //   icmp = (struct icmp_hdr*) (packet+BYTES_UNTIL_BODY+BYTES_UNTIL_IP_DATA);
           isICMP = 1;
         break;
 
@@ -77,14 +72,12 @@ void compute_stack(unsigned char* packet, struct stack_node** root, char** filte
     }
   } else {
     if(eth->ether_type == htons(0x806)){ //ARP
-    //   arp = (struct arp_hdr*) (packet+BYTES_UNTIL_BODY);
       isARP = 1;
     }
   }
 
   for(i = 0; i < len; i++){
     // primitives
-    printf("O QUE TEM NO FILTRO:   %s\n", filters[i]); //DEBUG
     if(filters[i][2] == ':'){ // ethernet address
       unsigned long int eth_addr;
       eth_addr = get_ulint_ether_addr_from_string(filters[i]);
@@ -107,67 +100,57 @@ void compute_stack(unsigned char* packet, struct stack_node** root, char** filte
       b = pop(root);
       a = pop(root);
       eq = (unsigned long int)(a==b);
-      printf("passei pelo EQ do parser\n"); //DEBUG
       push(root, eq);
     } else if(strcmp(filters[i], "and") == 0){
       unsigned long int a, b, and;
       b = pop(root);
       a = pop(root);
       and = (unsigned long int)(a && b);
-      printf("passei pelo AND do parser\n"); //DEBUG
       push(root, and);
     } else if(strcmp(filters[i], "or") == 0){
       unsigned long int a, b, or;
       b = pop(root);
       a = pop(root);
       or = (unsigned long int)(a || b);
-      printf("passei pelo OR do parser\n"); //DEBUG
       push(root, or);
     } else if(strcmp(filters[i], "not") == 0){
       unsigned long int a, not;
       a = pop(root);
       not = (unsigned long int)(!a);
-      printf("passei pelo ! do parser\n"); //DEBUG
       push(root, not);
     } else if(strcmp(filters[i], "+") == 0){
       unsigned long int a, b, add;
       b = pop(root);
       a = pop(root);
       add = (a + b);
-      printf("passei pelo + do parser\n"); //DEBUG
       push(root, add);
     } else if(strcmp(filters[i], "-") == 0){
       unsigned long int a, b, sub;
       b = pop(root);
       a = pop(root);
       sub = (a - b);
-      printf("passei pelo - do parser\n"); //DEBUG
       push(root, sub);
     } else if(strcmp(filters[i], "*") == 0){
       unsigned long int a, b, mult;
       b = pop(root);
       a = pop(root);
       mult = a*b;
-      printf("passei pelo * do parser\n"); //DEBUG
       push(root, mult);
     } else if(strcmp(filters[i], "/") == 0){
       unsigned long int a, b, divi;
       b = pop(root);
       a = pop(root);
       divi = (a / b);
-      printf("passei pelo / do parser\n"); //DEBUG
       push(root, divi);
     } else if(strcmp(filters[i], "%") == 0){
       unsigned long int a, b, mod;
       b = pop(root);
       a = pop(root);
       mod = (a % b);
-      printf("passei pelo %% do parser\n"); //DEBUG
       push(root, mod);
     }
 
     // Protocols
-    // TODO: fora do calc, implementaremos os filtros de relacionados a protocolo
     else if(strcmp(filters[i], "ip") == 0){
         push(root, isIP);
     } else if(strcmp(filters[i], "udp") == 0){
@@ -203,8 +186,6 @@ void compute_stack(unsigned char* packet, struct stack_node** root, char** filte
 
     }else if (strcmp(filters[i], "ipfrom") == 0){
         if (isIP){
-            printf("ip->ip_src: %lu\n", (unsigned long int)ip->ip_src);// DEBUG
-            printf("IP source%s\n", get_address_as_string_from_uint(ip->ip_src));
             push(root, (unsigned long int) ip->ip_src);
         }else{
             push(root,0);

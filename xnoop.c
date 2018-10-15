@@ -24,8 +24,7 @@ void basic_mode(struct ether_hdr* eth, unsigned char* packet, struct options* op
 
   if(flag == 1){
     print_statistics(&stat);
-    printf("END OF EXECUTION\n"); //TODO: trocar pela chamada da função que mostra as estatísticas
-    // aqui vai a funçao que imprime o struct
+    printf("END OF EXECUTION\n");
     exit(0);
   }
 
@@ -44,12 +43,6 @@ void basic_mode(struct ether_hdr* eth, unsigned char* packet, struct options* op
 		if(memcmp(get_mac_adress(opt->iface), eth->ether_dhost, 6) == 0)
     		stat.to_this_host++;
 		 }
-
-    // printf("IFACE: %u\n", get_mac_adress(opt->iface)); // DEBUG
-    // print_eth_address("MAC LIDO", get_mac_adress(opt->iface));// DEBUG
-    // print_eth_address("MAC RECEBIDO",eth->ether_dhost);// DEBUG
-
-
 
 	if(eth->ether_type == htons(0x0800)) { //IP
 		stat.ip++;
@@ -87,10 +80,6 @@ void do_process(unsigned char* packet, int len, struct options* opt, char** filt
 		return;
 
 	struct ether_hdr* eth = (struct ether_hdr*) packet;
-
-	// print_eth_address("\nDst =", eth->ether_dhost);
-	// print_eth_address(" Src =", eth->ether_shost);
-	// printf(" Ether Type = 0x%04X Size = %d", ntohs(eth->ether_type), len);
 
   if(opt->mode == BASIC_MODE){
     // printf("Entrou no if basic mode\n"); //DEBUG
@@ -132,12 +121,8 @@ int main(int argc, char** argv) {
     init_options(opt);
 	int start_filters_pos = 0;
 	start_filters_pos = set_options(opt, argc, argv)+1;
-	printf("start_filters_pos: %d\n", start_filters_pos); //DEBUG
-	printf("ARGC %d\n", argc); //DEBUG
-
 
 	unsigned int filters_len = argc-start_filters_pos;
-	printf("Filters len %d\n", filters_len); //DEBUG
 	char** filters = argv+start_filters_pos;
 
 	// END: dealing with user's parameters in command line
@@ -145,10 +130,8 @@ int main(int argc, char** argv) {
   if(opt->mode == BASIC_MODE){
     struct sigaction act;
     act.sa_handler = &flag_setter;
-    // act.sa_flags = 0;
     act.sa_flags = SA_RESTART | SA_NOCLDSTOP;
     sigemptyset (&act.sa_mask);
-    // sigaction(SIGINT, &act, NULL);
 
     if (sigaction(SIGINT, &act, NULL) == -1) {
 	  	perror(0);
@@ -176,10 +159,8 @@ int main(int argc, char** argv) {
 		printf("\nCould not allocate a packet buffer\n");
 		exit(1);
 	}
-  // printf("antes do while(1) da main\n"); //DEBUG
 	while(1) {
 		n = recvfrom(sockfd, packet_buffer, MAX_PACKET_SIZE, 0, &saddr, &saddr_len);
-    // printf("passou do recv\n");//DEBUG
 		if(n < 0) {
 			fprintf(stderr, "ERROR: %s\n", strerror(errno));
 			exit(1);

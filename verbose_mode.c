@@ -4,23 +4,16 @@
 
 void print_ip_packet_verbose(unsigned char* packet, struct ip_hdr* ip_header, int shouldnt_translate){
 	print_current_time();
-	// printf("passou da print current time\n");// DEBUG
 
 	char* src_address = get_address_as_string_from_uint(ip_header->ip_src);
 	char* dst_address = get_address_as_string_from_uint(ip_header->ip_dst);
 
-		// printf("passou das get_address_as_string_from_uint\n");// DEBUG
-
 	if(shouldnt_translate == DONT_USE_OPTION){ // translate addresses
 		char* translated_src = translate_address(src_address);
 		printf(" %s ", translated_src);
-		// free(translated_src); // DEBUG comentei pra ver se sai o seg fault
 		printf("->");
 		char* translated_dst = translate_address(dst_address);
 		printf(" %s ", translated_dst);
-		// free(translated_dst); // DEBUG comentei pra ver se sai o seg fault
-
-			// printf("passou das translate_address\n");// DEBUG
 
 	} else { // don't translate addresses
 
@@ -35,12 +28,11 @@ void print_ip_packet_verbose(unsigned char* packet, struct ip_hdr* ip_header, in
 		struct tcp_hdr* tcp_header = build_tcp_header(packet);
 		struct servent *sptr;
 
-		// TODO: tem que checar dst_port pra serviço?, e outra, decidir se usa htons ou não, note que udp e tcp tao diferentes
 		sptr = getservbyport(tcp_header->src_port, "tcp");
 
 		printf("TCP ");
 		if(sptr!=NULL) printf("%s ", sptr->s_name);
-		printf("sourceport=%d ", ntohs(tcp_header->src_port)); // TODO: é ntohs mesmo ou puro?
+		printf("sourceport=%d ", ntohs(tcp_header->src_port));
 		printf("destport=%d\n", ntohs(tcp_header->dst_port));
 
 	} else if (ip_header->ip_proto == UDP){
@@ -55,11 +47,12 @@ void print_ip_packet_verbose(unsigned char* packet, struct ip_hdr* ip_header, in
 		printf("destport=%d\n", ntohs(udp_header->dst_port));
 	} else if (ip_header->ip_proto == ICMP){
 		printf("ICMP ");
-		// struct icmp_hdr* icmp_header = build_icmp_header(packet);
-		printf("Destination unreachable (Bad port)\n");
+		struct icmp_hdr* icmp_header = build_icmp_header(packet);
+		char* type_string = get_icmp_type_string(icmp_header->type);
+		printf("%s\n", type_string);
+		free(type_string);
 	}
 
-	// cada protocolo terá seu if com os prints do nome do protocolo e das portas
 }
 
 void print_arp_packet_verbose(unsigned char* packet, int shouldnt_translate){
@@ -72,13 +65,9 @@ void print_arp_packet_verbose(unsigned char* packet, int shouldnt_translate){
 	if(shouldnt_translate == DONT_USE_OPTION){ // translate addresses
 		char* translated_src = translate_address(src_address);
 		printf(" %s ", translated_src);
-		// free(translated_src); // DEBUG comentei pra ver se sai o seg fault
 		printf("->");
 		char* translated_dst = translate_address(dst_address);
 		printf(" %s ", translated_dst);
-		// free(translated_dst); // DEBUG comentei pra ver se sai o seg fault
-
-			// printf("passou das translate_address\n");// DEBUG
 
 	} else { // don't translate addresses
 
@@ -107,7 +96,6 @@ void verbose_mode(struct ether_hdr* eth, unsigned char* packet, struct options* 
 		exit(0);
 
 	packet_counter++;
-	// printf("Total: %d Current: %d\n", opt->show_n_first_packets, packet_counter); //DEBUG
 
 	if(eth->ether_type == htons(0x0800)) { //IP
 		struct ip_hdr* ip_header;
@@ -118,7 +106,6 @@ void verbose_mode(struct ether_hdr* eth, unsigned char* packet, struct options* 
 			printf("This analyzer doesn't know this packet's protocol.\n");
 		}
 	} else if(eth->ether_type == htons(0x0806)) { // ARP
-		// printf("This is an ARP Packet.\n");// DEBUG
 		print_arp_packet_verbose(packet, opt->shouldnt_translate_names);
 	} else {
 		printf("This analyzer doesn't know this packet's protocol.\n");
