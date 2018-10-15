@@ -119,7 +119,7 @@ void print_ip_protocol(struct ip_hdr* ip, int shouldnt_translate){
 		else printf(", %s\n", t_src_addr);
 	}
 	else{
-		printf("IP:   \n");
+		printf("\n");
 	}
 
 	printf("IP:   Destination address = %s", dst_addr);
@@ -133,9 +133,9 @@ void print_ip_protocol(struct ip_hdr* ip, int shouldnt_translate){
 			printf("IP:   \n");
 	}
 	else{
-		printf("IP:   \n");
+		printf("\n");
 	}
-
+	printf("IP:   \n");
 
 	free(src_addr);
 	free(dst_addr);
