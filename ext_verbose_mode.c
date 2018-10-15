@@ -213,7 +213,7 @@ void print_udp_protocol(struct udp_hdr* udp, unsigned char* packet){
 	printf("UDP:  Source port = %u\n", ntohs(udp->src_port));
 	printf("UDP:  Destination port = %u\n", ntohs(udp->dst_port));
 	printf("UDP:  Length = %u\n", udp->len);
-	printf("UDP:  Checksum = %4x\n", udp->checksum);
+	printf("UDP:  Checksum = %4x\n", ntohs(udp->checksum));
 	printf("UDP:  \n");
 	printf("UDP: Data: First 64 bytes\n");
 	print_64_data_bytes("UDP", data_start);
@@ -250,14 +250,14 @@ void print_tcp_protocol(struct tcp_hdr* tcp_header, unsigned char* packet){
 	printf("TCP:  ----- TCP Header -----\n");
 	printf("TCP:  Source port = %u\n", ntohs(tcp_header->src_port));
 	printf("TCP:  Destination port = %u\n", ntohs(tcp_header->dst_port));
-	printf("TCP:  Sequence Number = %u\n", tcp_header->seq_num);
-	printf("TCP:  Acknowledgement number = %u\n", tcp_header->ack_num);
+	printf("TCP:  Sequence Number = %u\n", ntohl(tcp_header->seq_num));
+	printf("TCP:  Acknowledgement number = %u\n", ntohl(tcp_header->ack_num));
 	printf("TCP:  Data offset = %u bytes\n", tcp_header->data_offset);
 	printf("TCP:  Flags = 0x%hx\n", tcp_header->control_flags);
 	print_tcp_flags(tcp_header);
-	printf("TCP:  Window = %u\n", tcp_header->window_size);
-	printf("TCP:  Checksum = %4x\n", tcp_header->checksum);
-	printf("TCP:  Urgent pointer = %u\n", tcp_header->urgent_pointer);
+	printf("TCP:  Window = %u\n", ntohs(tcp_header->window_size));
+	printf("TCP:  Checksum = %4x\n", ntohs(tcp_header->checksum));
+	printf("TCP:  Urgent pointer = %u\n", ntohs(tcp_header->urgent_pointer));
 	printf("TCP:  No Options\n");
 	printf("TCP: Data: (first 64 bytes)\n");
 	print_64_data_bytes("TCP", data_start);
@@ -291,7 +291,7 @@ void print_icmp_protocol(struct icmp_hdr* icmp){
 	printf("ICMP:  \n");
 	printf("ICMP:  Type = %u (%s)\n", icmp->type, type_string);
 	printf("ICMP:  Code = %u\n", icmp->code);
-	printf("ICMP:  Checksum = %4x\n", icmp->checksum);
+	printf("ICMP:  Checksum = %4x\n", ntohs(icmp->checksum));
 	printf("ICMP:  \n\n");
 	free(type_string);
 }
