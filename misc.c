@@ -1,5 +1,6 @@
 #include "defines.h"
 #include <time.h>
+#include "misc.h"
 
 void print_current_time(){
 	time_t rawtime;
@@ -110,6 +111,25 @@ unsigned long int get_ulint_ether_addr_from_string(char* str_addr){
 	sscanf(str_addr, "%x:%x:%x:%x:%x:%x",
 	&values[0], &values[1], &values[2],
 	&values[3], &values[4], &values[5]);
+
+	for(i = 0; i < 6; i++){
+		aux = values[i];
+		ulint_addr = ulint_addr | (aux << shift_bits);
+		shift_bits = shift_bits-8;
+	}
+	return ulint_addr;
+}
+
+unsigned long int get_ulint_ether_addr_from_bytes(unsigned char* str_addr){
+	unsigned int values[6];
+	int shift_bits = 40;
+	int i;
+	unsigned long int ulint_addr = 0;
+	unsigned long int aux;
+
+	for(i = 0; i < 6; i++){
+		values[i] = (int) str_addr[i];
+	}
 
 	for(i = 0; i < 6; i++){
 		aux = values[i];

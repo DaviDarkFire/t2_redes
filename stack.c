@@ -166,13 +166,15 @@ void compute_stack(unsigned char* packet, struct stack_node** root, char** filte
     // ethernet
 
     else if (strcmp(filters[i], "etherto") == 0){
-        push(root, (unsigned long int)eth->ether_dhost);
+        unsigned long int ulint_dhost = get_ulint_ether_addr_from_bytes(eth->ether_dhost);
+        push(root, ulint_dhost);
 
     }else if (strcmp(filters[i], "etherfrom") == 0){
+        unsigned long int ulint_shost = get_ulint_ether_addr_from_bytes(eth->ether_shost);
         push(root, (unsigned long int)eth->ether_shost);
 
     }else if (strcmp(filters[i], "ethertype") == 0){
-        push(root, (unsigned long int)eth->ether_type);
+        push(root, (unsigned long int)ntohs(eth->ether_type));
 
     }
 
