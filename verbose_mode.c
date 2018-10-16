@@ -1,6 +1,6 @@
 #include "defines.h"
 #include "misc.h"
-
+#include "stack.h"
 
 void print_ip_packet_verbose(unsigned char* packet, struct ip_hdr* ip_header, int shouldnt_translate){
 	print_current_time();
