@@ -1,3 +1,9 @@
+// Universidade Federal de Mato Grosso do Sul
+// FACOM - Redes de Computadores - 2018/2
+// Segundo Trabalho: Analisador de Pacotes
+// Alunos: Caio Henrique Suzuki Polidoro
+//			   Davi Ferreira Santo
+
 #include "defines.h"
 #include "struct_dealer.h"
 #include "basic_mode.h"
