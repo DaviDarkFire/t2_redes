@@ -1,5 +1,6 @@
 #include "defines.h"
 #include <time.h>
+#include "misc.h"
 
 void print_current_time(){
 	time_t rawtime;
@@ -14,10 +15,10 @@ char * get_address_as_string_from_uint(unsigned int uint_address){
 	unsigned char first_byte, second_byte, third_byte, fourth_byte;
 	char* char_address = malloc(sizeof(char)*15);
 
-	fourth_byte = ((uint_address>>24)&0xFF);
-	third_byte = ((uint_address>>16)&0xFF);
-	second_byte = ((uint_address>>8)&0xFF);
-	first_byte = (uint_address&0xFF);
+	first_byte = ((uint_address>>24)&0xFF);
+	second_byte = ((uint_address>>16)&0xFF);
+	third_byte = ((uint_address>>8)&0xFF);
+	fourth_byte = (uint_address&0xFF);
 
 	sprintf(char_address, "%d.%d.%d.%d", first_byte, second_byte, third_byte, fourth_byte);
 
@@ -83,7 +84,6 @@ int get_packet_size(unsigned char* packet){
     return sizeof(packet);
 }
 
-//DEBUG esta função só serve para vermos bits das variáveis enquanto implementamos, tirar quando terminar trabalho
 void printBits(size_t const size, void const * const ptr)
 {
     unsigned char *b = (unsigned char*) ptr;
@@ -114,9 +114,26 @@ unsigned long int get_ulint_ether_addr_from_string(char* str_addr){
 
 	for(i = 0; i < 6; i++){
 		aux = values[i];
-		ulint_addr = ulint_addr | (aux << shift_bits); // trocar shift para shift bits
-		printBits(sizeof(values[i]), &values[i]);
-		printBits(sizeof(ulint_addr), &ulint_addr);
+		ulint_addr = ulint_addr | (aux << shift_bits);
+		shift_bits = shift_bits-8;
+	}
+	return ulint_addr;
+}
+
+unsigned long int get_ulint_ether_addr_from_bytes(unsigned char* str_addr){
+	unsigned int values[6];
+	int shift_bits = 40;
+	int i;
+	unsigned long int ulint_addr = 0;
+	unsigned long int aux;
+
+	for(i = 0; i < 6; i++){
+		values[i] = (int) str_addr[i];
+	}
+
+	for(i = 0; i < 6; i++){
+		aux = values[i];
+		ulint_addr = ulint_addr | (aux << shift_bits);
 		shift_bits = shift_bits-8;
 	}
 	return ulint_addr;
@@ -135,9 +152,72 @@ unsigned long int get_ulint_ip_addr_from_string(char* str_addr){
 	for(i = 0; i < 4; i++){
 		aux = values[i];
 		ulint_addr = ulint_addr | (aux << shift_bits);
-		printBits(sizeof(values[i]), &values[i]);
-		printBits(sizeof(ulint_addr), &ulint_addr);
 		shift_bits = shift_bits-8;
 	}
 	return ulint_addr;
+}
+
+char* get_icmp_type_string(unsigned char type){
+	char* type_string;
+	type_string = malloc(sizeof(char)*32);
+	switch(type){
+		case 0:
+			strcpy(type_string, "Echo reply");
+		break;
+
+		case 3:
+			strcpy(type_string, "Destination unreachable");
+		break;
+
+		case 5:
+			strcpy(type_string, "Redirect message");
+		break;
+
+		case 8:
+			strcpy(type_string, "Echo request");
+		break;
+
+		case 9:
+			strcpy(type_string, "Router advertisement");
+		break;
+
+		case 10:
+			strcpy(type_string, "Router solicitation");
+		break;
+
+		case 11:
+			strcpy(type_string, "Time exceeded");
+		break;
+
+		case 12:
+			strcpy(type_string, "Parameter problem: bad IP header");
+		break;
+
+		case 13:
+			strcpy(type_string, "Timestamp");
+		break;
+
+		case 14:
+			strcpy(type_string, "Timestamp reply");
+		break;
+
+		case 42:
+			strcpy(type_string, "Extended echo request");
+		break;
+
+		case 43:
+			strcpy(type_string, "Extended echo reply");
+		break;
+
+		default: strcpy(type_string, "Unknown");
+	}
+	return type_string;
+}
+
+// Print an Ethernet address
+void print_eth_address(char *s, unsigned char *eth_addr)
+{
+	printf("%s %02X:%02X:%02X:%02X:%02X:%02X", s,
+	       eth_addr[0], eth_addr[1], eth_addr[2],
+	       eth_addr[3], eth_addr[4], eth_addr[5]);
 }
